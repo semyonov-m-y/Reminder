@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="86dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/thumbnail_image"
+        android:layout_width="@dimen/recycler_image_size"
+        android:layout_height="@dimen/recycler_image_size"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:contentDescription="@string/list_item_image" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="@dimen/reminder_mini_margin"
+        android:layout_marginBottom="@dimen/reminder_mini_margin"
+        android:layout_toStartOf="@+id/active_image"
+        android:layout_toEndOf="@id/thumbnail_image"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/recycle_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/abc_primary_text_material_dark"
+            android:textSize="@dimen/reminder_default_text_size"
+            tools:text="Title" />
+
+        <TextView
+            android:id="@+id/recycle_date_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:textColor="@color/abc_secondary_text_material_dark"
+            android:textSize="@dimen/reminder_small_text_size"
+            tools:text="Date and Time" />
+
+        <TextView
+            android:id="@+id/recycle_repeat_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:textColor="@color/abc_secondary_text_material_dark"
+            android:textSize="@dimen/reminder_small_text_size"
+            tools:text="Repeat Amount and Type" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/active_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:src="@drawable/notifications_grey"
+        android:contentDescription="@string/list_item_status_image" />
+
+</RelativeLayout>

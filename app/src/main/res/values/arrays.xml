@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="app_color">
+        <item>Default</item>
+        <item>Green</item>
+        <item>Pink</item>
+        <item>Blue</item>
+    </string-array>
+</resources>

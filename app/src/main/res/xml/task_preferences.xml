@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/app_name">
+
+        <RingtonePreference
+            android:key="@string/tone_default_key"
+            android:summary="@string/tone_description"
+            android:title="@string/tone"
+            android:ringtoneType="notification"
+            android:showSilent="false" />
+
+        <ListPreference
+            android:key="set_color"
+            android:title="@string/choose_color"
+            android:summary="@string/set_app_color"
+            android:defaultValue="0"
+            android:entries="@array/app_color"
+            android:entryValues="@array/app_color"
+            android:dialogTitle="@string/choose_app_color" />
+
+    </PreferenceCategory>
+</PreferenceScreen>
