@@ -50,46 +50,47 @@ import java.util.List;
 public class ReminderAddActivity extends AppCompatActivity implements TimePickerDialog.OnTimeSetListener,
         DatePickerDialog.OnDateSetListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final int GALLERY_REQUEST_CODE = 0;
-    private static final int REQUEST_PHOTO = 2;
+    // Константы, учитываемые при повороте экрана
+    static final String KEY_TITLE = "title_key";
+    static final String KEY_TIME = "time_key";
+    static final String KEY_DATE = "date_key";
+    static final String KEY_REPEAT = "repeat_key";
+    static final String KEY_REPEAT_NO = "repeat_no_key";
+    static final String KEY_REPEAT_TYPE = "repeat_type_key";
+    static final String KEY_ACTIVE = "active_key";
+
+    // Константы в миллисекундах
+    static final long sMilMinute = 60000L;
+    static final long sMilHour = 3600000L;
+    static final long sMilDay = 86400000L;
+    static final long sMilWeek = 604800000L;
+    static final long sMilMonth = 2592000000L;
+
+    static final int REQUEST_PHOTO = 2;
+    final int GALLERY_REQUEST_CODE = 0;
 
     private static ReminderDatabase sBase;
 
-    private Button mReportButton;
-    private Calendar mCalendar;
-    private EditText mTitleText;
-    private File mPhotoFile;
-    private FloatingActionButton mFloatingActionButton1, mFloatingActionButton2;
-    private ImageButton mPhotoButton;
-    private ImageView mPhotoView;
-    private int mYear, mMonth, mHour, mMinute, mDay, mID;
-    private long mRepeatTime;
-    private Reminder mReminder;
-    private String mTitle, mTime, mDate, mRepeat, mRepeatAmount, mRepeatType, mActive;
-    private TextView mDateText, mTimeText, mRepeatText, mRepeatAmountText, mRepeatTypeText;
-    private Toolbar mToolbar;
-
-    // Константы, учитываемые при повороте экрана
-    private static final String KEY_TITLE = "title_key";
-    private static final String KEY_TIME = "time_key";
-    private static final String KEY_DATE = "date_key";
-    private static final String KEY_REPEAT = "repeat_key";
-    private static final String KEY_REPEAT_NO = "repeat_no_key";
-    private static final String KEY_REPEAT_TYPE = "repeat_type_key";
-    private static final String KEY_ACTIVE = "active_key";
-
-    // Константы в миллисекундах
-    private static final long sMilMinute = 60000L;
-    private static final long sMilHour = 3600000L;
-    private static final long sMilDay = 86400000L;
-    private static final long sMilWeek = 604800000L;
-    private static final long sMilMonth = 2592000000L;
+    Button mReportButton;
+    Calendar mCalendar;
+    EditText mTitleText;
+    File mPhotoFile;
+    FloatingActionButton mFloatingActionButton1, mFloatingActionButton2;
+    ImageButton mPhotoButton;
+    ImageView mPhotoView;
+    int mYear, mMonth, mHour, mMinute, mDay, mID;
+    long mRepeatTime;
+    Reminder mReminder;
+    String mTitle, mTime, mDate, mRepeat, mRepeatAmount, mRepeatType, mActive;
+    TextView mDateText, mTimeText, mRepeatText, mRepeatAmountText, mRepeatTypeText;
+    Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_reminder);
 
+        mPhotoView = findViewById(R.id.note_photo);
         mToolbar = findViewById(R.id.toolbar);
         mTitleText = findViewById(R.id.reminder_title);
         mDateText = findViewById(R.id.set_date);
@@ -109,7 +110,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         mActive = "true";
         mRepeat = "true";
         mRepeatAmount = Integer.toString(1);
-        mRepeatType = "Hour";
+        mRepeatType = getString(R.string.default_repeat_type);
 
         mCalendar = Calendar.getInstance();
         mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
@@ -142,7 +143,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         mTimeText.setText(mTime);
         mRepeatAmountText.setText(mRepeatAmount);
         mRepeatTypeText.setText(mRepeatType);
-        mRepeatText.setText("Every " + mRepeatAmount + " " + mRepeatType + "(s)");
+        mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
 
         // Сохраняем значений для поворота экрана
         if (savedInstanceState != null) {
@@ -181,6 +182,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
             mFloatingActionButton2.setVisibility(View.VISIBLE);
         }
 
+        // Добавляем кнопку отправки напоминания по почте
         mReportButton = findViewById(R.id.note_report);
         mReportButton.setOnClickListener(v12 -> {
             Intent i = new Intent(Intent.ACTION_SEND);
@@ -204,12 +206,11 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         mPhotoButton.setEnabled(canTakePhoto);
         mPhotoButton.setOnClickListener(v13 -> {
             Uri uri = FileProvider.getUriForFile(getApplicationContext(),
-                    "ru.semenovmy.learning.reminder",
-                    mPhotoFile);
+                    "ru.semenovmy.learning.reminder", mPhotoFile);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Choose next action:");
-            builder.setNegativeButton("Make photo",
+            builder.setMessage(getString(R.string.choose_action));
+            builder.setNegativeButton(getString(R.string.make_photo),
                     (dialog, which) -> {
                         captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                         List<ResolveInfo> cameraActivities = getApplicationContext()
@@ -221,12 +222,11 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
                         }
                         startActivityForResult(captureImage, REQUEST_PHOTO);
                     });
-            builder.setNeutralButton("Add from gallery",
+            builder.setNeutralButton(getString(R.string.add_from_gallery),
                     (dialog, which) -> pickFromGallery());
+            //mPhotoView.setImageURI(uri);
             builder.show();
         });
-
-        mPhotoView = findViewById(R.id.note_photo);
 
         updatePhotoView();
 
@@ -259,7 +259,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         intent.setType("image/*");
 
         // Устанавливаем допустимые типы фото
-        String[] mimeTypes = {"image/jpeg", "image/png"};
+        String[] mimeTypes = {"image/jpg", "image/png"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         startActivityForResult(intent, GALLERY_REQUEST_CODE);
     }
@@ -269,21 +269,22 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         super.onActivityResult(requestCode, resultCode, data);
 
         // Результат RESULT_OK только если выбрано фото
-        if (resultCode == Activity.RESULT_OK)
+        if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case GALLERY_REQUEST_CODE:
                     Uri selectedImage = data.getData();
                     String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+/*                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
                     cursor.moveToFirst();
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                     String imgDecodableString = cursor.getString(columnIndex);
-                    cursor.close();
+                    cursor.close();*/
 
-                    mPhotoView.setImageBitmap(BitmapFactory.decodeFile(imgDecodableString));
+                    mPhotoView.setImageURI(selectedImage);
                     break;
             }
+        }
     }
 
     /**
@@ -291,12 +292,12 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        String backgroundColour = sharedPreferences.getString("set_color", "Default");
-        if (backgroundColour.equals("Green")) {
+        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
+        if (backgroundColour.equals(getString(R.string.color_green))) {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals("Pink")) {
+        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals("Blue")) {
+        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorBlue));
         } else {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.primary_dark));
@@ -389,7 +390,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         boolean on = ((Switch) view).isChecked();
         if (on) {
             mRepeat = "true";
-            mRepeatText.setText("Every " + mRepeatAmount + " " + mRepeatType + "(s)");
+            mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
         } else {
             mRepeat = "false";
             mRepeatText.setText(R.string.repeat_off);
@@ -402,19 +403,19 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     public void selectRepeatType(View v) {
         final String[] items = new String[5];
 
-        items[0] = "Minute";
-        items[1] = "Hour";
-        items[2] = "Day";
-        items[3] = "Week";
-        items[4] = "Month";
+        items[0] = getString(R.string.minute);
+        items[1] = getString(R.string.hour);
+        items[2] = getString(R.string.day);
+        items[3] = getString(R.string.week);
+        items[4] = getString(R.string.month);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Type");
+        builder.setTitle(getString(R.string.select_type));
         builder.setItems(items, (dialog, item) -> {
 
             mRepeatType = items[item];
             mRepeatTypeText.setText(mRepeatType);
-            mRepeatText.setText("Every " + mRepeatAmount + " " + mRepeatType + "(s)");
+            mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
         });
         AlertDialog alert = builder.create();
         alert.show();
@@ -425,25 +426,25 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
      */
     public void setRepeatNo(View v) {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Enter Number");
+        alert.setTitle(getString(R.string.enter_number));
 
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         alert.setView(input);
-        alert.setPositiveButton("Ok",
+        alert.setPositiveButton(getString(R.string.ok),
                 (dialog, whichButton) -> {
 
                     if (input.getText().toString().length() == 0) {
                         mRepeatAmount = Integer.toString(1);
                         mRepeatAmountText.setText(mRepeatAmount);
-                        mRepeatText.setText("Every " + mRepeatAmount + " " + mRepeatType + "(s)");
+                        mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
                     } else {
                         mRepeatAmount = input.getText().toString().trim();
                         mRepeatAmountText.setText(mRepeatAmount);
-                        mRepeatText.setText("Every " + mRepeatAmount + " " + mRepeatType + "(s)");
+                        mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
                     }
                 });
-        alert.setNegativeButton("Cancel", (dialog, whichButton) -> {
+        alert.setNegativeButton(getString(R.string.cancel), (dialog, whichButton) -> {
             // Do nothing
         });
         alert.show();
@@ -466,15 +467,15 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         mCalendar.set(Calendar.SECOND, 0);
 
         // Проверяем тип повторения
-        if (mRepeatType.equals("Minute")) {
+        if (mRepeatType.equals(getString(R.string.minute))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMinute;
-        } else if (mRepeatType.equals("Hour")) {
+        } else if (mRepeatType.equals(getString(R.string.hour))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilHour;
-        } else if (mRepeatType.equals("Day")) {
+        } else if (mRepeatType.equals(getString(R.string.day))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilDay;
-        } else if (mRepeatType.equals("Week")) {
+        } else if (mRepeatType.equals(getString(R.string.week))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilWeek;
-        } else if (mRepeatType.equals("Month")) {
+        } else if (mRepeatType.equals(getString(R.string.month))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMonth;
         }
 
@@ -488,7 +489,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         }
 
         // Показываем что напоминание сохранено
-        Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), getString(R.string.saved), Toast.LENGTH_SHORT).show();
 
         onBackPressed();
     }
@@ -524,7 +525,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
                 mTitleText.setText(mTitle);
 
                 if (mTitleText.getText().toString().length() == 0)
-                    mTitleText.setError("Reminder Title cannot be blank!");
+                    mTitleText.setError(getString(R.string.not_blank));
 
                 else {
                     saveReminder();
@@ -532,7 +533,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
                 return true;
 
             case R.id.discard_reminder:
-                Toast.makeText(getApplicationContext(), "Discarded",
+                Toast.makeText(getApplicationContext(), getString(R.string.discarded),
                         Toast.LENGTH_SHORT).show();
 
                 onBackPressed();
@@ -578,12 +579,12 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        String backgroundColour = sharedPreferences.getString("set_color", "Default");
-        if (backgroundColour.equals("Green")) {
+        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
+        if (backgroundColour.equals(getString(R.string.color_green))) {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals("Pink")) {
+        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals("Blue")) {
+        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorBlue));
         } else {
             findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.primary_dark));

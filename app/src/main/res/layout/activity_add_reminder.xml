@@ -38,8 +38,9 @@
             android:minLines="4"
             android:scrollHorizontally="false"
             android:textColor="@android:color/white"
-            android:textColorHint="@color/primary_text_disabled_material_dark"
-            android:textSize="@dimen/big_reminder_text_size" />
+            android:textColorHint="@color/accent"
+            android:textSize="@dimen/big_reminder_text_size"
+            android:importantForAutofill="no" />
 
     </LinearLayout>
 
@@ -57,11 +58,12 @@
                 android:id="@+id/details"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/half_layout_height"
+                android:layout_gravity="center"
                 android:layout_marginStart="@dimen/half_layout_height"
                 android:layout_marginTop="@dimen/reminder_top_margin"
                 android:gravity="center_vertical"
                 android:text="@string/details"
-                android:textColor="@color/abc_secondary_text_material_dark"
+                android:textColor="@color/grey"
                 android:textSize="@dimen/medium_reminder_text_size" />
 
             <LinearLayout
@@ -120,14 +122,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/date"
-                        android:textColor="@color/abc_primary_text_material_dark"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                     <TextView
                         android:id="@+id/set_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/abc_secondary_text_material_dark"
+                        android:textColor="@color/grey"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                 </LinearLayout>
@@ -165,14 +167,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/time"
-                        android:textColor="@color/abc_primary_text_material_dark"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                     <TextView
                         android:id="@+id/set_time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/abc_secondary_text_material_dark"
+                        android:textColor="@color/grey"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                 </LinearLayout>
@@ -207,14 +209,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/repeat"
-                        android:textColor="@color/abc_primary_text_material_dark"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                     <TextView
                         android:id="@+id/set_repeat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/abc_secondary_text_material_dark"
+                        android:textColor="@color/grey"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                 </LinearLayout>
@@ -266,14 +268,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/repeat_no"
-                        android:textColor="@color/abc_primary_text_material_dark"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                     <TextView
                         android:id="@+id/set_repeat_no"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/abc_secondary_text_material_dark"
+                        android:textColor="@color/grey"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                 </LinearLayout>
@@ -297,7 +299,7 @@
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginEnd="@dimen/activity_end_margin"
                     android:src="@drawable/type"
-                    android:contentDescription="@string/repeat_type" />
+                    android:contentDescription="@string/repeat_type_button" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -311,14 +313,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/repeat_type"
-                        android:textColor="@color/abc_primary_text_material_dark"
+                        android:textColor="@color/white"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                     <TextView
                         android:id="@+id/set_repeat_type"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/abc_secondary_text_material_dark"
+                        android:textColor="@color/grey"
                         android:textSize="@dimen/medium_reminder_text_size" />
 
                 </LinearLayout>
@@ -353,7 +355,8 @@
         app:fab_size="normal"
         fab:fab_colorNormal="@color/accent"
         fab:fab_colorPressed="@color/fab_pressed"
-        fab:fab_icon="@drawable/notifications_grey" />
+        fab:fab_icon="@drawable/notifications_grey"
+        android:contentDescription="@string/is_not_active"/>
 
     <com.getbase.floatingactionbutton.FloatingActionButton
         android:id="@+id/starred2"
@@ -369,6 +372,7 @@
         app:fab_size="normal"
         fab:fab_colorNormal="@color/accent"
         fab:fab_colorPressed="@color/fab_pressed"
-        fab:fab_icon="@drawable/bell" />
+        fab:fab_icon="@drawable/bell"
+        android:contentDescription="@string/is_active"/>
 
 </RelativeLayout>

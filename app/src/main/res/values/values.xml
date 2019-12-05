@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_tone_default_key" translatable="false">default_tone</string>
+    <string name="set_color" translatable="false">set_color</string>
+    <string name="boot_completed" translatable="false">android.intent.action.BOOT_COMPLETED</string>
+    <string name="action_boot_completed" translatable="false">android.intent.action.ACTION_BOOT_COMPLETED</string>
+    <string name="ok" translatable="false">OK</string>
+</resources>

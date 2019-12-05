@@ -11,10 +11,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import androidx.core.app.NotificationCompat;
 import java.util.Calendar;
 
 /**
@@ -43,7 +43,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         Uri ringtoneUri;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String defaultToneKey = context.getString(R.string.tone_default_key);
+        String defaultToneKey = context.getString(R.string.pref_tone_default_key);
 
         String ringtonePreference = sharedPreferences.getString(defaultToneKey, "content://settings/system/notification_sound");
         ringtoneUri = Uri.parse(ringtonePreference);
@@ -55,8 +55,8 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setContentTitle(context.getResources().getString(R.string.app_name))
                 .setTicker(mTitle)
                 .setContentText(mTitle)
-                //.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setSound(ringtoneUri)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                //.setSound(ringtoneUri)
                 .setContentIntent(mClick)
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true);

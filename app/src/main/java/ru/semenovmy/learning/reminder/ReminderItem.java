@@ -5,7 +5,7 @@ package ru.semenovmy.learning.reminder;
  *
  * @author Maxim Semenov on 2019-11-15
  */
-class ReminderItem {
+public class ReminderItem {
 
     public final String mTitle;
     public final String mDateTime;

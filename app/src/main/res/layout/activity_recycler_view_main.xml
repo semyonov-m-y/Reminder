@@ -78,6 +78,7 @@
         android:clickable="true"
         android:focusable="true"
         fab:fab_colorNormal="@color/accent"
-        fab:fab_colorPressed="@color/fab_pressed" />
+        fab:fab_colorPressed="@color/fab_pressed"
+        android:contentDescription="@string/add_reminder_button"/>
 
 </RelativeLayout>

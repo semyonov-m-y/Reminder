@@ -7,4 +7,6 @@
     <color name="fab_pressed">#546e7a</color>
     <color name="colorBlue">#6666ff</color>
     <color name="colorPink">#FF96CA</color>
+    <color name="white">#FFFFFF</color>
+    <color name="grey">#BDBDBD</color>
 </resources>

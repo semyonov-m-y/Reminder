@@ -3,6 +3,7 @@ package ru.semenovmy.learning.reminder;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
@@ -12,7 +13,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,9 +31,9 @@ import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bignerdranch.android.multiselector.ModalMultiSelectorCallback;
 import com.bignerdranch.android.multiselector.MultiSelector;
+import com.bignerdranch.android.multiselector.SelectableHolder;
 import com.bignerdranch.android.multiselector.SwappingHolder;
 import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +45,9 @@ import java.util.List;
  *
  * @author Maxim Semenov on 2019-11-15
  */
-public class MainRecyclerViewActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainRecyclerViewActivity extends AppCompatActivity
+        implements SharedPreferences.OnSharedPreferenceChangeListener,
+        SearchView.OnQueryTextListener {
 
     private final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
     private final MultiSelector mMultiSelector = new MultiSelector();
@@ -91,27 +97,20 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
-        filter.addAction("android.intent.action.BOOT_COMPLETED");
+        filter.addAction(getString(R.string.boot_completed));
+        filter.addAction(getString(R.string.action_boot_completed));
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
-        intentFilter.addAction("android.intent.action.BOOT_COMPLETED");
+        intentFilter.addAction(getString(R.string.boot_completed));
+        intentFilter.addAction(getString(R.string.action_boot_completed));
         mNotificationReceiver = new NotificationReceiver();
         bootReceiver = new BootReceiver();
         registerReceiver(mNotificationReceiver, filter);
         registerReceiver(bootReceiver, intentFilter);
 
-        /*IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
-        intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        //intentFilter.addAction(Intent.QUICKBOOT_POWERON);
-        mNotificationReceiver = new NotificationReceiver();
-        registerReceiver(mNotificationReceiver, intentFilter);*/
-
         initDisplayModeSpinner();
 
         setUpDefaultSetting();
-
-        setupSearch();
     }
 
     /**
@@ -119,55 +118,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        getMenuInflater().inflate(R.menu.menu_add_reminder, menu);
-    }
-
-    /**
-     * Метод для создания поиска по элементам Recycler View
-     */
-    private void setupSearch() {
-        MaterialSearchView searchView = findViewById(R.id.search_view);
-        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                processQuery(query);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
-
-        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
-            @Override
-            public void onSearchViewShown() {
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-                mAdapter.generateListData(getDefaultItemCount());
-            }
-        });
-    }
-
-    /**
-     * Метод для отображения элементов Recycler View после поиска
-     */
-    private void processQuery(String query) {
-        ArrayList<Reminder> result = new ArrayList<>();
-
-        for (Reminder reminder : mReminderDatabase.getAllReminders()) {
-            if (reminder.getTitle().toLowerCase().contains(query.toLowerCase())) {
-                result.add(reminder);
-            }
-        }
-
-        //mAdapter.generateListData(result.size());
-        // mAdapter.notifyDataSetChanged();
-        //mAdapter.setItemCount(result.size());
-        //createRecyclerView();
+        getMenuInflater().inflate(R.menu.menu_delete_reminder, menu);
     }
 
     /**
@@ -179,6 +130,31 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
         mAdapter = new RecyclerViewAdapter();
         mAdapter.setItemCount(getDefaultItemCount());
         mList.setAdapter(mAdapter);
+    }
+
+    /**
+     * Метод для создания меню
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.recycler_view_main_menu, menu);
+
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mAdapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+        return true;
     }
 
     /**
@@ -209,17 +185,14 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
         mAdapter.setItemCount(getDefaultItemCount());
     }
 
-    /**
-     * Метод для создания меню
-     */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.recycler_view_main_menu, menu);
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
 
-        MenuItem item = menu.findItem(R.id.action_search);
-        MaterialSearchView searchView = findViewById(R.id.search_view);
-        searchView.setMenuItem(item);
-        return true;
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
     }
 
     /**
@@ -271,12 +244,12 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        String backgroundColour = sharedPreferences.getString("set_color", "Default");
-        if (backgroundColour.equals("Green")) {
+        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
+        if (backgroundColour.equals(getString(R.string.color_green))) {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals("Pink")) {
+        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals("Blue")) {
+        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorBlue));
         } else {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.primary_dark));
@@ -304,7 +277,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
 
         @Override
         public boolean onCreateActionMode(androidx.appcompat.view.ActionMode actionMode, Menu menu) {
-            getMenuInflater().inflate(R.menu.menu_add_reminder, menu);
+            getMenuInflater().inflate(R.menu.menu_delete_reminder, menu);
             return true;
         }
 
@@ -335,7 +308,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
 
                     // Отобразить сообщение о подтверждении удаления элемента
                     Toast.makeText(getApplicationContext(),
-                            "Deleted", Toast.LENGTH_SHORT).show();
+                            getString(R.string.reminder_deleted), Toast.LENGTH_SHORT).show();
 
                     // Если нет напоминаний, отображаем сообщение с просьбой добавить напоминание
                     List<Reminder> mTest = mReminderDatabase.getAllReminders();
@@ -380,12 +353,12 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        String backgroundColour = sharedPreferences.getString("set_color", "Default");
-        if (backgroundColour.equals("Green")) {
+        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
+        if (backgroundColour.equals(getString(R.string.color_green))) {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals("Pink")) {
+        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals("Blue")) {
+        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorBlue));
         } else {
             findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.primary_dark));
@@ -393,14 +366,27 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
     }
 
     /**
+     * Метод для нажатия на кнопку Назад по умолчанию
+     */
+/*    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        mMultiSelector.clearSelections();
+    }*/
+
+    /**
      * Класс адаптера для Recycler View
      */
-    public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder> {
+    public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder>
+            implements Filterable {
 
         private final ArrayList<ReminderItem> mItems;
+        List<ReminderItem> reminderItemsFull;
 
         RecyclerViewAdapter() {
             mItems = new ArrayList<>();
+            reminderItemsFull = new ArrayList<>(mItems);
         }
 
         /**
@@ -501,6 +487,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
                 AppCompatActivity activity = MainRecyclerViewActivity.this;
                 activity.startSupportActionMode(mDeleteMode);
                 mMultiSelector.setSelected(this, true);
+                v.setBackgroundColor(Color.DKGRAY);
                 return true;
             }
 
@@ -534,9 +521,9 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
              */
             void setReminderRepeatInfo(String repeat, String repeatNo, String repeatType) {
                 if (repeat.equals("true")) {
-                    mRepeatInfoText.setText("Every " + repeatNo + " " + repeatType + "(s)");
+                    mRepeatInfoText.setText(getString(R.string.every) + " " + repeatNo + " " + repeatType);
                 } else if (repeat.equals("false")) {
-                    mRepeatInfoText.setText("Repeat Off");
+                    mRepeatInfoText.setText(getString(R.string.repeat_off));
                 }
             }
 
@@ -617,6 +604,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
                     mIDmap.put(k, IDList.get(i));
                     k++;
                 }
+                reminderItemsFull = items;
             } else {
                 for (TitleSorter item : TitleSortList) {
                     int i = item.getIndex();
@@ -634,6 +622,44 @@ public class MainRecyclerViewActivity extends AppCompatActivity implements Share
             }
             return items;
         }
+
+        /**
+         * Метод для фильтрации списка
+         */
+        @Override
+        public Filter getFilter() {
+            return filter;
+        }
+
+        private Filter filter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                List<ReminderItem> filteredList = new ArrayList<>();
+
+                if (constraint == null || constraint.length() == 0) {
+                    filteredList.addAll(reminderItemsFull);
+                } else {
+                    String filterPattern = constraint.toString().toLowerCase().trim();
+
+                    for (ReminderItem item : reminderItemsFull) {
+                        if (item.mTitle.toLowerCase().contains(filterPattern)) {
+                            filteredList.add(item);
+                        }
+                    }
+                }
+
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                mItems.clear();
+                mItems.addAll((List)results.values);
+                notifyDataSetChanged();
+            }
+        };
     }
 
     @Override

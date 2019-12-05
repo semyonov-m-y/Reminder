@@ -36,7 +36,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-       // if (intent.getAction().equals("android.intent.action.ACTION_LOCKED_BOOT_COMPLETED")) {
+        if (intent.getAction().equals(R.string.boot_completed)) {
 
             ReminderDatabase rb = new ReminderDatabase(context);
             mCalendar = Calendar.getInstance();
@@ -73,15 +73,15 @@ public class BootReceiver extends BroadcastReceiver {
                 mNotificationReceiver.cancelNotification(context, mReceivedID);
 
                 // Проверка типа напоминания
-                if (mRepeatType.equals("Minute")) {
+                if (mRepeatType.equals(R.string.minute)) {
                     mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMinute;
-                } else if (mRepeatType.equals("Hour")) {
+                } else if (mRepeatType.equals(R.string.hour)) {
                     mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilHour;
-                } else if (mRepeatType.equals("Day")) {
+                } else if (mRepeatType.equals(R.string.day)) {
                     mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilDay;
-                } else if (mRepeatType.equals("Week")) {
+                } else if (mRepeatType.equals(R.string.week)) {
                     mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilWeek;
-                } else if (mRepeatType.equals("Month")) {
+                } else if (mRepeatType.equals(R.string.month)) {
                     mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMonth;
                 }
 
@@ -94,6 +94,6 @@ public class BootReceiver extends BroadcastReceiver {
                     }
                 }
             }
-        //}
+        }
     }
 }
