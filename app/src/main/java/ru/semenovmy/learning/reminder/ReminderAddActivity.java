@@ -193,8 +193,11 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         });
 
         // Обрабатываем работу с картинкой
-        mReminder = get(getApplicationContext()).getAllReminders().get(mID);
-        mPhotoFile = getPhotoFile(mReminder);
+        if (get(getApplicationContext()).getAllReminders() == null) {
+            mReminder = get(getApplicationContext()).getAllReminders().get(mID);
+
+            mPhotoFile = getPhotoFile(mReminder);
+        }
 
         PackageManager packageManager = getPackageManager();
         mPhotoButton = findViewById(R.id.note_camera);
