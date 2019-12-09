@@ -43,6 +43,7 @@ public class ReminderEditActivity extends ReminderAddActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String EXTRA_REMINDER_ID = "Reminder_ID";
+    public static final String EXTRA_LIST = "EXTRA_LIST";
 
     private int mReceivedID;
     private NotificationReceiver mNotificationReceiver;

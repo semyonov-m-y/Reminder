@@ -3,40 +3,27 @@ package ru.semenovmy.learning.reminder;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.amulyakhare.textdrawable.TextDrawable;
-import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bignerdranch.android.multiselector.ModalMultiSelectorCallback;
 import com.bignerdranch.android.multiselector.MultiSelector;
-import com.bignerdranch.android.multiselector.SelectableHolder;
-import com.bignerdranch.android.multiselector.SwappingHolder;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -49,10 +36,10 @@ public class MainRecyclerViewActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener,
         SearchView.OnQueryTextListener {
 
-    private final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
+    public final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
     private final MultiSelector mMultiSelector = new MultiSelector();
 
-    private static int sItemPosition;
+    public static int sItemPosition;
 
     private BootReceiver bootReceiver;
     private FloatingActionButton mAddReminderButton;
@@ -60,9 +47,9 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     private List<TitleSorter> TitleSortList;
     private List<DateTimeSorter> DateTimeSortList;
     private NotificationReceiver mNotificationReceiver;
-    private RecyclerView mList;
+    public RecyclerView mList;
     private RecyclerViewAdapter mAdapter;
-    private ReminderDatabase mReminderDatabase;
+    public ReminderDatabase mReminderDatabase;
     private TextView mNoReminderView;
     private Toolbar mToolbar;
 
@@ -124,10 +111,10 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     /**
      * Метод для создания Recycler View
      */
-    private void createRecyclerView() {
+    public void createRecyclerView() {
         mList.setLayoutManager(getLayoutManager());
         registerForContextMenu(mList);
-        mAdapter = new RecyclerViewAdapter();
+        mAdapter = new RecyclerViewAdapter(getApplicationContext());
         mAdapter.setItemCount(getDefaultItemCount());
         mList.setAdapter(mAdapter);
     }
@@ -259,21 +246,21 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     /**
      * Метод для установки LayoutManager
      */
-    private RecyclerView.LayoutManager getLayoutManager() {
+    public RecyclerView.LayoutManager getLayoutManager() {
         return new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
     }
 
     /**
      * Метод для установки ненулевого количества элементов по умолчанию
      */
-    private int getDefaultItemCount() {
+    public int getDefaultItemCount() {
         return 100;
     }
 
     /**
      * Метод для выбора нескольких элементов в Recycler View
      */
-    private final androidx.appcompat.view.ActionMode.Callback mDeleteMode = new ModalMultiSelectorCallback(mMultiSelector) {
+    public final androidx.appcompat.view.ActionMode.Callback mDeleteMode = new ModalMultiSelectorCallback(mMultiSelector) {
 
         @Override
         public boolean onCreateActionMode(androidx.appcompat.view.ActionMode actionMode, Menu menu) {
@@ -338,7 +325,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     /**
      * Метод для действия при нажатии на элемент Recycler View
      */
-    private void selectReminder(int mClickID) {
+    public void selectReminder(int mClickID) {
         String mStringClickID = Integer.toString(mClickID);
 
         Intent intent = new Intent(this, ReminderEditActivity.class);
@@ -378,7 +365,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     /**
      * Класс адаптера для Recycler View
      */
-    public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder>
+/*   public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder>
             implements Filterable {
 
         private final ArrayList<ReminderItem> mItems;
@@ -389,26 +376,26 @@ public class MainRecyclerViewActivity extends AppCompatActivity
             reminderItemsFull = new ArrayList<>(mItems);
         }
 
-        /**
+        *//**
          * Метод для установки количества элементов Recycler View
-         */
+         *//*
         void setItemCount(int count) {
             mItems.clear();
-            mItems.addAll(generateListData(count));
+            mItems.addAll(util.generateListData(count));
             notifyDataSetChanged();
         }
 
-        /**
+        *//**
          * Метод для удаления элементов Recycler View
-         */
+         *//*
         void onDeleteItem(int count) {
             mItems.clear();
-            mItems.addAll(generateListData(count));
+            mItems.addAll(util.generateListData(count));
         }
 
-        /**
+        *//**
          * Метод для удаления выбранных элементов Recycler View
-         */
+         *//*
         void removeItemSelected(int selected) {
             if (mItems.isEmpty()) return;
             mItems.remove(selected);
@@ -438,9 +425,9 @@ public class MainRecyclerViewActivity extends AppCompatActivity
             return mItems.size();
         }
 
-        /**
+        *//**
          * Класс для UI и данных для Recycler View
-         */
+         *//*
         public class VerticalItemHolder extends SwappingHolder
                 implements View.OnClickListener, View.OnLongClickListener {
 
@@ -491,9 +478,9 @@ public class MainRecyclerViewActivity extends AppCompatActivity
                 return true;
             }
 
-            /**
+            *//**
              * Метод для установки заголовка списка
-             */
+             *//*
             void setReminderTitle(String title) {
                 mTitleText.setText(title);
                 String letter = "A";
@@ -509,16 +496,16 @@ public class MainRecyclerViewActivity extends AppCompatActivity
                 mThumbnailImage.setImageDrawable(mDrawableBuilder);
             }
 
-            /**
+            *//**
              * Метод для установки даты и времени списка
-             */
+             *//*
             void setReminderDateTime(String datetime) {
                 mDateAndTimeText.setText(datetime);
             }
 
-            /**
+            *//**
              * Метод для установки повторений напоминания в списке
-             */
+             *//*
             void setReminderRepeatInfo(String repeat, String repeatNo, String repeatType) {
                 if (repeat.equals("true")) {
                     mRepeatInfoText.setText(getString(R.string.every) + " " + repeatNo + " " + repeatType);
@@ -527,9 +514,9 @@ public class MainRecyclerViewActivity extends AppCompatActivity
                 }
             }
 
-            /**
+            *//**
              * Метод для установки картинки для элемента списка
-             */
+             *//*
             void setActiveImage(String active) {
                 if (active.equals("true")) {
                     mActiveImage.setImageResource(R.drawable.bell);
@@ -539,10 +526,10 @@ public class MainRecyclerViewActivity extends AppCompatActivity
             }
         }
 
-        /**
+        *//**
          * Метод для генерации данных списка
-         */
-        List<ReminderItem> generateListData(int count) {
+         *//*
+*//*        List<ReminderItem> generateListData(int count) {
             ArrayList<ReminderItem> items = new ArrayList<>();
 
             List<Reminder> reminders = mReminderDatabase.getAllReminders();
@@ -621,11 +608,11 @@ public class MainRecyclerViewActivity extends AppCompatActivity
                 }
             }
             return items;
-        }
+        }*//*
 
-        /**
+        *//**
          * Метод для фильтрации списка
-         */
+         *//*
         @Override
         public Filter getFilter() {
             return filter;
@@ -660,7 +647,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity
                 notifyDataSetChanged();
             }
         };
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
