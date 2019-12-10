@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
@@ -30,23 +31,27 @@ import static ru.semenovmy.learning.reminder.MainRecyclerViewActivity.sItemPosit
  * Класс адаптера для Recycler View
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder>
-            implements Filterable {
+            /*implements Filterable */{
 
-    private final ArrayList<ReminderItem> mItems;
+    public final ArrayList<ReminderItem> mItems;
     List<ReminderItem> reminderItemsFull;
     public final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
     private final MultiSelector mMultiSelector = new MultiSelector();
     private int mTempPost;
-    private List<TitleSorter> TitleSortList;
-    private List<DateTimeSorter> DateTimeSortList;
-    private ReminderDatabase mReminderDatabase;
+    public List<TitleSorter> TitleSortList;
+    public List<DateTimeSorter> DateTimeSortList;
+    public ReminderDatabase mReminderDatabase;
     MainRecyclerViewActivity mainRecyclerViewActivity;
+    private OnItemClickListener mOnItemClickListener;
+    Util util;
 
-    RecyclerViewAdapter(Context context) {
+    RecyclerViewAdapter(Context context, OnItemClickListener listener) {
         mItems = new ArrayList<>();
         reminderItemsFull = new ArrayList<>(mItems);
         mReminderDatabase = new ReminderDatabase(context);
         mainRecyclerViewActivity = new MainRecyclerViewActivity();
+        mOnItemClickListener = listener;
+        util = new Util(context);
     }
 
     /**
@@ -91,6 +96,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         itemHolder.setReminderDateTime(item.mDateTime);
         itemHolder.setReminderRepeatInfo(item.mRepeat, item.mRepeatNo, item.mRepeatType);
         itemHolder.setActiveImage(item.mActive);
+
+        itemHolder.bind();
     }
 
     @Override
@@ -102,7 +109,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     * Класс для UI и данных для Recycler View
     */
     public class VerticalItemHolder extends SwappingHolder
-            implements View.OnClickListener, View.OnLongClickListener {
+            implements View.OnLongClickListener {
 
         private final TextView mTitleText;
         private final TextView mDateAndTimeText;
@@ -116,7 +123,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         VerticalItemHolder(View itemView, RecyclerViewAdapter adapter) {
             super(itemView, mMultiSelector);
 
-            itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             itemView.setLongClickable(true);
 
@@ -127,21 +133,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             mRepeatInfoText = itemView.findViewById(R.id.recycle_repeat_info);
             mActiveImage = itemView.findViewById(R.id.active_image);
             mThumbnailImage = itemView.findViewById(R.id.thumbnail_image);
+
+            //util.generateListData(mainRecyclerViewActivity.getDefaultItemCount());
         }
 
-        @Override
-        public void onClick(View v) {
-            if (!mMultiSelector.tapSelection(this)) {
-                //mainRecyclerViewActivity.createRecyclerView();
-                mTempPost = mainRecyclerViewActivity.mList
-                        .getChildAdapterPosition(v);
+        void bind() {
+            itemView.setOnClickListener(v -> {
+                if (!mMultiSelector.tapSelection(this)) {
+                    mTempPost = getAdapterPosition();
+                    int mReminderClickID = mIDmap.get(mTempPost);
 
-                int mReminderClickID = mIDmap.get(mTempPost);
-                mainRecyclerViewActivity.selectReminder(mReminderClickID);
-
-            } else if (mMultiSelector.getSelectedPositions().isEmpty()) {
-                mAdapter.setItemCount(mainRecyclerViewActivity.getDefaultItemCount());
-            }
+                    mOnItemClickListener.onClick(mReminderClickID);
+                } else if (mMultiSelector.getSelectedPositions().isEmpty()) {
+                    mAdapter.setItemCount(mainRecyclerViewActivity.getDefaultItemCount());
+                }
+            });
         }
 
         @Override
@@ -204,8 +210,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     /**
     * Метод для генерации данных списка
     */
+    ArrayList<ReminderItem> items;
    List<ReminderItem> generateListData(int count) {
-        ArrayList<ReminderItem> items = new ArrayList<>();
+        items = new ArrayList<>();
 
         List<Reminder> reminders = mReminderDatabase.getAllReminders();
 
@@ -288,7 +295,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     /**
     * Метод для фильтрации списка
     */
-    @Override
+/*    @Override
     public Filter getFilter() {
         return filter;
     }
@@ -321,5 +328,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             mItems.addAll((List)results.values);
             notifyDataSetChanged();
         }
-    };
+    };*/
+
+    public List<ReminderItem> getReminderItemsFull() {
+        return reminderItemsFull;
+    }
+
+    public ArrayList<ReminderItem> getmItems() {
+        return mItems;
+    }
 }

@@ -9,14 +9,17 @@ import java.util.List;
 
 public class Util {
 
-    Context context;
-    private ReminderDatabase mReminderDatabase = new ReminderDatabase(context);
+    private ReminderDatabase mReminderDatabase;
     private List<DateTimeSorter> DateTimeSortList;
     private List<TitleSorter> TitleSortList;
     private static int sItemPosition;
     private final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
     private final ArrayList<ReminderItem> mItems = new ArrayList<>();
     List<ReminderItem> reminderItemsFull = new ArrayList<>(mItems);
+
+    public Util(Context context) {
+        mReminderDatabase = new ReminderDatabase(context);
+    }
 
     /**
      * Метод для генерации данных списка
