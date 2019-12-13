@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.SystemClock;
@@ -21,6 +22,8 @@ import ru.semenovmy.learning.reminder.R;
 import ru.semenovmy.learning.reminder.ReminderEditActivity;
 import ru.semenovmy.learning.reminder.database.ReminderDatabase;
 import ru.semenovmy.learning.reminder.database.Reminder;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
  * Класс для установки напоминания
@@ -53,21 +56,32 @@ public class NotificationReceiver extends BroadcastReceiver {
         String ringtonePreference = sharedPreferences.getString(defaultToneKey, "content://settings/system/notification_sound");
         ringtoneUri = Uri.parse(ringtonePreference);
 
-        // Создать напоминание
-        Notification.Builder mBuilder = new Notification.Builder(context)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                .setSmallIcon(R.drawable.clock_white)
-                .setContentTitle(context.getResources().getString(R.string.app_name))
-                .setTicker(mTitle)
-                .setContentText(mTitle)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                //.setSound(ringtoneUri)
-                .setContentIntent(mClick)
-                .setAutoCancel(true)
-                .setOnlyAlertOnce(true);
+        // Задаём звук напоминания
+        try {
+            Ringtone r = RingtoneManager.getRingtone(context, ringtoneUri);
+            r.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        NotificationManager nManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        nManager.notify(mReceivedID, mBuilder.build());
+        // Создаем напоминание
+        Notification.Builder mNotification = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            mNotification = new Notification.Builder(context)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                    .setSmallIcon(R.drawable.clock_white)
+                    .setContentTitle(context.getResources().getString(R.string.app_name))
+                    .setTicker(mTitle)
+                    .setContentText(mTitle)
+                    .setDefaults(Notification.DEFAULT_VIBRATE)
+                    .setSound(ringtoneUri)
+                    .setContentIntent(mClick)
+                    .setAutoCancel(true)
+                    .setOnlyAlertOnce(true);
+        }
+
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(mReceivedID, mNotification.build());
     }
 
     /**
