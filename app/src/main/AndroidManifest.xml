@@ -45,7 +45,7 @@
             android:name=".PreferencesActivity"
             android:label="@string/title_activity_edit_reminder" />
         <receiver
-            android:name=".NotificationReceiver"
+            android:name=".receiver.NotificationReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
@@ -56,7 +56,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".BootReceiver"
+            android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">

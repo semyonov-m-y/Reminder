@@ -3,9 +3,9 @@ package ru.semenovmy.learning.reminder;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,19 +13,20 @@ import android.widget.AdapterView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bignerdranch.android.multiselector.ModalMultiSelectorCallback;
-import com.bignerdranch.android.multiselector.MultiSelector;
 import com.getbase.floatingactionbutton.FloatingActionButton;
-
-import java.util.LinkedHashMap;
 import java.util.List;
+
+import ru.semenovmy.learning.reminder.adapter.SpinnerAdapter;
+import ru.semenovmy.learning.reminder.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.model.ReminderItem;
+import ru.semenovmy.learning.reminder.receiver.BootReceiver;
+import ru.semenovmy.learning.reminder.receiver.NotificationReceiver;
 
 /**
  * Main class for recycler view
@@ -34,26 +35,20 @@ import java.util.List;
  */
 public class MainRecyclerViewActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener,
-        SearchView.OnQueryTextListener, OnItemClickListener  {
-
-    public final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
-    private final MultiSelector mMultiSelector = new MultiSelector();
+        SearchView.OnQueryTextListener, OnItemClickListener {
 
     public static int sItemPosition;
 
-    private BootReceiver bootReceiver;
-    private FloatingActionButton mAddReminderButton;
-    private int mTempPost;
-    private List<TitleSorter> TitleSortList;
-    private List<DateTimeSorter> DateTimeSortList;
-    private NotificationReceiver mNotificationReceiver;
+    public NotificationReceiver mNotificationReceiver;
     public RecyclerView mList;
-    public RecyclerViewAdapter mAdapter;
+    public FilterRecyclerView mAdapter;
     public ReminderDatabase mReminderDatabase;
-    private TextView mNoReminderView;
+    public TextView mNoReminderView;
+    private BootReceiver mBootReceiver;
+    private FloatingActionButton mAddReminderButton;
     private Toolbar mToolbar;
-
-    FilterRecyclerView filterRecyclerView;
+    public FilterRecyclerView mFilterRecyclerView;
+    public MyAsyncTask myAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +60,6 @@ public class MainRecyclerViewActivity extends AppCompatActivity
         mAddReminderButton = findViewById(R.id.add_reminder);
         mList = findViewById(R.id.reminder_list);
         mNoReminderView = findViewById(R.id.no_reminder_text);
-
-        List<Reminder> mReminders = mReminderDatabase.getAllReminders();
-
-        // Если нет напоминаний, отображаем сообщение с просьбой добавить напоминание
-        if (mReminders.isEmpty()) {
-            mNoReminderView.setVisibility(View.VISIBLE);
-        }
 
         createRecyclerView();
 
@@ -93,24 +81,24 @@ public class MainRecyclerViewActivity extends AppCompatActivity
         intentFilter.addAction(getString(R.string.boot_completed));
         intentFilter.addAction(getString(R.string.action_boot_completed));
         mNotificationReceiver = new NotificationReceiver();
-        bootReceiver = new BootReceiver();
+        mBootReceiver = new BootReceiver();
         registerReceiver(mNotificationReceiver, filter);
-        registerReceiver(bootReceiver, intentFilter);
+        registerReceiver(mBootReceiver, intentFilter);
 
         initDisplayModeSpinner();
 
         setUpDefaultSetting();
 
-        filterRecyclerView = new FilterRecyclerView(getApplicationContext(), this);
+        mFilterRecyclerView = new FilterRecyclerView(getApplicationContext(), this);
     }
 
     /**
      * Метод для создания меню при долгом нажатии на элемент Recycler View
      */
-    @Override
+/*    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         getMenuInflater().inflate(R.menu.menu_delete_reminder, menu);
-    }
+    }*/
 
     /**
      * Метод для создания Recycler View
@@ -118,14 +106,14 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     public void createRecyclerView() {
         mList.setLayoutManager(getLayoutManager());
         registerForContextMenu(mList);
-        mAdapter = new RecyclerViewAdapter(getApplicationContext(), this);
+        mAdapter = new FilterRecyclerView(getApplicationContext(), this);
         mAdapter.setItemCount(getDefaultItemCount());
         mList.setAdapter(mAdapter);
+        myAsyncTask = new MyAsyncTask();
+        myAsyncTask.execute();
     }
 
-    /**
-     * Метод для создания меню
-     */
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.recycler_view_main_menu, menu);
@@ -141,8 +129,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                //mAdapter.getFilter().filter(newText);
-                filterRecyclerView.getFilter().filter(newText);
+                mAdapter.getFilter().filter(newText);
                 return false;
             }
         });
@@ -263,71 +250,6 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     }
 
     /**
-     * Метод для выбора нескольких элементов в Recycler View
-     */
-    public final androidx.appcompat.view.ActionMode.Callback mDeleteMode = new ModalMultiSelectorCallback(mMultiSelector) {
-
-        @Override
-        public boolean onCreateActionMode(androidx.appcompat.view.ActionMode actionMode, Menu menu) {
-            getMenuInflater().inflate(R.menu.menu_delete_reminder, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onActionItemClicked(androidx.appcompat.view.ActionMode actionMode, MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-
-                case R.id.discard_reminder:
-                    // Закрыть меню
-                    actionMode.finish();
-
-                    // Получить id напоминания равному элементу Recycler View
-                    for (int i = mIDmap.size(); i >= 0; i--) {
-                        if (mMultiSelector.isSelected(i, 0)) {
-                            int id = mIDmap.get(i);
-
-                            Reminder temp = mReminderDatabase.getReminder(id);
-                            mReminderDatabase.deleteReminder(temp);
-                            mAdapter.removeItemSelected(i);
-                            mNotificationReceiver.cancelNotification(getApplicationContext(), id);
-                        }
-                    }
-
-                    mMultiSelector.clearSelections();
-
-                    // Пересоздать Recycler View, чтобы переопределить элементы
-                    mAdapter.onDeleteItem(getDefaultItemCount());
-
-                    // Отобразить сообщение о подтверждении удаления элемента
-                    Toast.makeText(getApplicationContext(),
-                            getString(R.string.reminder_deleted), Toast.LENGTH_SHORT).show();
-
-                    // Если нет напоминаний, отображаем сообщение с просьбой добавить напоминание
-                    List<Reminder> mTest = mReminderDatabase.getAllReminders();
-
-                    if (mTest.isEmpty()) {
-                        mNoReminderView.setVisibility(View.VISIBLE);
-                    } else {
-                        mNoReminderView.setVisibility(View.GONE);
-                    }
-
-                    return true;
-
-                case R.id.save_reminder:
-                    // Закрыть меню
-                    actionMode.finish();
-
-                    mMultiSelector.clearSelections();
-                    return true;
-
-                default:
-                    break;
-            }
-            return false;
-        }
-    };
-
-    /**
      * Метод для установки цвета страницы
      */
     private void setUpDefaultSetting() {
@@ -362,5 +284,13 @@ public class MainRecyclerViewActivity extends AppCompatActivity
         Intent intent = new Intent(this, ReminderEditActivity.class);
         intent.putExtra(ReminderEditActivity.EXTRA_REMINDER_ID, mStringClickID);
         startActivityForResult(intent, 1);
+    }
+
+    private class MyAsyncTask extends AsyncTask<Integer, Integer, List<ReminderItem>> {
+
+        @Override
+        protected List<ReminderItem> doInBackground(Integer... voids) {
+            return mAdapter.generateListData(mAdapter.getItemCount());
+        }
     }
 }

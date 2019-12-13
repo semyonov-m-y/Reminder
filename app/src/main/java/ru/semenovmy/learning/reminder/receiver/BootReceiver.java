@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,6 +6,10 @@ import android.content.Intent;
 
 import java.util.Calendar;
 import java.util.List;
+
+import ru.semenovmy.learning.reminder.R;
+import ru.semenovmy.learning.reminder.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.database.Reminder;
 
 /**
  * Класс для загрузки напоминания

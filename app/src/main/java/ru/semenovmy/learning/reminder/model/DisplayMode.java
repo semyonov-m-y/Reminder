@@ -1,6 +1,8 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.model;
 
 import androidx.annotation.StringRes;
+
+import ru.semenovmy.learning.reminder.R;
 
 /**
  * Список элементов для Spinner

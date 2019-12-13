@@ -7,9 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -42,6 +40,11 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
+import ru.semenovmy.learning.reminder.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.receiver.NotificationReceiver;
+import ru.semenovmy.learning.reminder.utils.PictureUtils;
+
 /**
  * Класс для добавления элемента Recycler View
  *
@@ -71,19 +74,19 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
 
     private static ReminderDatabase sBase;
 
-    Button mReportButton;
-    Calendar mCalendar;
-    EditText mTitleText;
-    File mPhotoFile;
-    FloatingActionButton mFloatingActionButton1, mFloatingActionButton2;
-    ImageButton mPhotoButton;
-    ImageView mPhotoView;
-    int mYear, mMonth, mHour, mMinute, mDay, mID;
-    long mRepeatTime;
-    Reminder mReminder;
-    String mTitle, mTime, mDate, mRepeat, mRepeatAmount, mRepeatType, mActive;
-    TextView mDateText, mTimeText, mRepeatText, mRepeatAmountText, mRepeatTypeText;
-    Toolbar mToolbar;
+    public Button mReportButton;
+    public Calendar mCalendar;
+    public EditText mTitleText;
+    public File mPhotoFile;
+    public FloatingActionButton mFloatingActionButton1, mFloatingActionButton2;
+    public ImageButton mPhotoButton;
+    public ImageView mPhotoView;
+    public int mYear, mMonth, mHour, mMinute, mDay, mID;
+    public long mRepeatTime;
+    public Reminder mReminder;
+    public String mTitle, mTime, mDate, mRepeat, mRepeatAmount, mRepeatType, mActive;
+    public TextView mDateText, mTimeText, mRepeatText, mRepeatAmountText, mRepeatTypeText;
+    public Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,7 +198,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         // Обрабатываем работу с картинкой
         if (get(getApplicationContext()).getAllReminders() == null) {
             mReminder = get(getApplicationContext()).getAllReminders().get(mID);
-
             mPhotoFile = getPhotoFile(mReminder);
         }
 
@@ -207,7 +209,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
                 captureImage.resolveActivity(packageManager) != null;
 
         mPhotoButton.setEnabled(canTakePhoto);
-        mPhotoButton.setOnClickListener(v13 -> {
+        mPhotoButton.setOnClickListener(view -> {
             Uri uri = FileProvider.getUriForFile(getApplicationContext(),
                     "ru.semenovmy.learning.reminder", mPhotoFile);
 
@@ -233,20 +235,19 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
 
         updatePhotoView();
 
-        setUpDefaultSetting();
+        setUpColorSetting();
     }
 
     /**
      * Метод для получения фото с камеры
+     * @param reminder напоминание для добавления фото
+     * @return директория для фото
      */
     File getPhotoFile(Reminder reminder) {
         File filesDir = getApplicationContext().getFilesDir();
         return new File(filesDir, reminder.getPhotoFilename());
     }
 
-    /**
-     * Метод для получения базы
-     */
     static ReminderDatabase get(Context context) {
         if (sBase == null) {
             sBase = new ReminderDatabase(context);
@@ -337,7 +338,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     }
 
     /**
-     * Метод для получения времени из TimePicker
+     * Метод для получения времени из TimePickerDialog
      */
     @Override
     public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
@@ -352,7 +353,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     }
 
     /**
-     * Метод для получения даты из TimePicker
+     * Метод для получения даты из DatePickerDialog
      */
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
@@ -497,26 +498,17 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         onBackPressed();
     }
 
-    /**
-     * Метод для нажатия на кнопку Назад по умолчанию
-     */
     @Override
     public void onBackPressed() {
         super.onBackPressed();
     }
 
-    /**
-     * Метод для создания нового меню
-     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add_reminder, menu);
+        getMenuInflater().inflate(R.menu.menu_save_reminder, menu);
         return true;
     }
 
-    /**
-     * Метод для установления реакций на нажатие пунктов меню
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -535,21 +527,11 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
                 }
                 return true;
 
-            case R.id.discard_reminder:
-                Toast.makeText(getApplicationContext(), getString(R.string.discarded),
-                        Toast.LENGTH_SHORT).show();
-
-                onBackPressed();
-                return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    /**
-     * Метод для сохранения состояний при повороте экрана
-     */
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -566,7 +548,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     /**
      * Метод для обновления фото на View
      */
-    private void updatePhotoView() {
+    public void updatePhotoView() {
         if (mPhotoFile == null || !mPhotoFile.exists()) {
             mPhotoView.setImageDrawable(null);
         } else {
@@ -578,7 +560,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     /**
      * Метод для установки цвета страницы
      */
-    void setUpDefaultSetting() {
+    void setUpColorSetting() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 

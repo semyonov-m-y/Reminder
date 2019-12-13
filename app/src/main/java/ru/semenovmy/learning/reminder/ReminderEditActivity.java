@@ -6,33 +6,24 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
-
-import java.io.File;
 import java.util.Calendar;
 import java.util.List;
+
+import ru.semenovmy.learning.reminder.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.receiver.NotificationReceiver;
 
 /**
  * Класс для редактирования элемента Recycler View
@@ -43,7 +34,6 @@ public class ReminderEditActivity extends ReminderAddActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String EXTRA_REMINDER_ID = "Reminder_ID";
-    public static final String EXTRA_LIST = "EXTRA_LIST";
 
     private int mReceivedID;
     private NotificationReceiver mNotificationReceiver;
@@ -213,7 +203,7 @@ public class ReminderEditActivity extends ReminderAddActivity implements
 
         updatePhotoView();
 
-        setUpDefaultSetting();
+        setUpColorSetting();
     }
 
     @Override
@@ -237,121 +227,6 @@ public class ReminderEditActivity extends ReminderAddActivity implements
                     break;
             }
         }
-    }
-
-    /**
-     * Метод для получения времени из TimePicker
-     */
-    @Override
-    public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
-        mHour = hourOfDay;
-        mMinute = minute;
-        if (minute < 10) {
-            mTime = hourOfDay + ":" + "0" + minute;
-        } else {
-            mTime = hourOfDay + ":" + minute;
-        }
-        mTimeText.setText(mTime);
-    }
-
-    /**
-     * Метод для получения даты из TimePicker
-     */
-    @Override
-    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        monthOfYear++;
-        mDay = dayOfMonth;
-        mMonth = monthOfYear;
-        mYear = year;
-        mDate = dayOfMonth + "/" + monthOfYear + "/" + year;
-        mDateText.setText(mDate);
-    }
-
-    /**
-     * Метод для получения реакции на нажатие активной кнопки
-     */
-    public void changeActiveButton(View v) {
-        mFloatingActionButton1 = findViewById(R.id.starred1);
-        mFloatingActionButton1.setVisibility(View.GONE);
-        mFloatingActionButton2 = findViewById(R.id.starred2);
-        mFloatingActionButton2.setVisibility(View.VISIBLE);
-        mActive = "true";
-    }
-
-    /**
-     * Метод для получения реакции на нажатие неактивной кнопки
-     */
-    public void changeInactiveButton(View v) {
-        mFloatingActionButton2 = findViewById(R.id.starred2);
-        mFloatingActionButton2.setVisibility(View.GONE);
-        mFloatingActionButton1 = findViewById(R.id.starred1);
-        mFloatingActionButton1.setVisibility(View.VISIBLE);
-        mActive = "false";
-    }
-
-    /**
-     * Метод для получения реакции на нажатие переключателя повторения напоминания
-     */
-    public void onSwitchRepeat(View view) {
-        boolean on = ((Switch) view).isChecked();
-        if (on) {
-            mRepeat = "true";
-            mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
-        } else {
-            mRepeat = "false";
-            mRepeatText.setText(R.string.repeat_off);
-        }
-    }
-
-    /**
-     * Метод для получения реакции на нажатие переключателя типа повторения напоминания
-     */
-    public void selectRepeatType(View v) {
-        final String[] items = new String[5];
-
-        items[0] = getString(R.string.minute);
-        items[1] = getString(R.string.hour);
-        items[2] = getString(R.string.day);
-        items[3] = getString(R.string.week);
-        items[4] = getString(R.string.month);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.select_type));
-        builder.setItems(items, (dialog, item) -> {
-            mRepeatType = items[item];
-            mRepeatTypeText.setText(mRepeatType);
-            mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    /**
-     * Метод для задания интервала повторения напоминания
-     */
-    public void setRepeatNo(View v) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(getString(R.string.enter_number));
-
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        alert.setView(input);
-        alert.setPositiveButton(getString(R.string.ok),
-                (dialog, whichButton) -> {
-                    if (input.getText().toString().length() == 0) {
-                        mRepeatAmount = Integer.toString(1);
-                        mRepeatAmountText.setText(mRepeatAmount);
-                        mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
-                    } else {
-                        mRepeatAmount = input.getText().toString().trim();
-                        mRepeatAmountText.setText(mRepeatAmount);
-                        mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
-                    }
-                });
-        alert.setNegativeButton(getString(R.string.cancel), (dialog, whichButton) -> {
-            // Do nothing
-        });
-        alert.show();
     }
 
     /**
@@ -379,7 +254,7 @@ public class ReminderEditActivity extends ReminderAddActivity implements
         // Отменяем существующее напоминание по ID
         mNotificationReceiver.cancelNotification(getApplicationContext(), mReceivedID);
 
-        // Проверяем тип напоминания
+        // Проверяем тип повторения
         if (mRepeatType.equals(getString(R.string.minute))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMinute;
         } else if (mRepeatType.equals(getString(R.string.hour))) {
@@ -403,12 +278,10 @@ public class ReminderEditActivity extends ReminderAddActivity implements
 
         // Показываем уведомление о том что напоминание
         Toast.makeText(getApplicationContext(), getString(R.string.edited_text), Toast.LENGTH_SHORT).show();
+
         onBackPressed();
     }
 
-    /**
-     * Метод для установления реакций на нажатие пунктов меню
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -427,21 +300,11 @@ public class ReminderEditActivity extends ReminderAddActivity implements
                 }
                 return true;
 
-            case R.id.discard_reminder:
-                Toast.makeText(getApplicationContext(), getString(R.string.discarded),
-                        Toast.LENGTH_SHORT).show();
-
-                onBackPressed();
-                return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    /**
-     * Метод для сохранения состояний при повороте экрана
-     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -453,17 +316,5 @@ public class ReminderEditActivity extends ReminderAddActivity implements
         outState.putCharSequence(KEY_REPEAT_NO, mRepeatAmountText.getText());
         outState.putCharSequence(KEY_REPEAT_TYPE, mRepeatTypeText.getText());
         outState.putCharSequence(KEY_ACTIVE, mActive);
-    }
-
-    /**
-     * Метод для обновления фото на View
-     */
-    private void updatePhotoView() {
-        if (mPhotoFile == null || !mPhotoFile.exists()) {
-            mPhotoView.setImageDrawable(null);
-        } else {
-            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), this);
-            mPhotoView.setImageBitmap(bitmap);
-        }
     }
 }

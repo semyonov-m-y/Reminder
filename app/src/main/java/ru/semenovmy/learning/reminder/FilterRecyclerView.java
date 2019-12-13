@@ -7,14 +7,20 @@ import android.widget.Filterable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.semenovmy.learning.reminder.OnItemClickListener;
+import ru.semenovmy.learning.reminder.RecyclerViewAdapter;
+import ru.semenovmy.learning.reminder.model.ReminderItem;
+
+/**
+ * Класс для фильтрации Recycler View
+ *
+ * @author Maxim Semenov on 2019-11-15
+ */
 public class FilterRecyclerView extends RecyclerViewAdapter implements Filterable {
 
-    RecyclerViewAdapter recyclerViewAdapter;
-
-    FilterRecyclerView(Context context, OnItemClickListener listener) {
+    public FilterRecyclerView(Context context, OnItemClickListener listener) {
         super(context, listener);
         generateListData(getItemCount());
-        recyclerViewAdapter = new RecyclerViewAdapter(context, listener);
     }
 
     @Override
@@ -22,17 +28,17 @@ public class FilterRecyclerView extends RecyclerViewAdapter implements Filterabl
         return filter;
     }
 
-    private Filter filter = new Filter() {
+    public Filter filter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<ReminderItem> filteredList = new ArrayList<>();
 
             if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(getReminderItemsFull());
+                filteredList.addAll(getmReminderItemsFull());
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
 
-                for (ReminderItem item : getReminderItemsFull()) {
+                for (ReminderItem item : getmReminderItemsFull()) {
                     if (item.mTitle.toLowerCase().contains(filterPattern)) {
                         filteredList.add(item);
                     }

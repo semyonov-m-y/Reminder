@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6,12 +6,14 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import ru.semenovmy.learning.reminder.model.DisplayMode;
+
 /**
  * Класс для spinner-адаптера
  *
  * @author Maxim Semenov on 2019-11-15
  */
-class SpinnerAdapter extends BaseAdapter {
+public class SpinnerAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {

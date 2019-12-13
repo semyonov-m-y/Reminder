@@ -1,18 +1,17 @@
 package ru.semenovmy.learning.reminder;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Filter;
-import android.widget.Filterable;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
@@ -25,38 +24,50 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import ru.semenovmy.learning.reminder.comparator.DateTimeComparator;
+import ru.semenovmy.learning.reminder.comparator.TitleComparator;
+import ru.semenovmy.learning.reminder.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.model.ReminderItem;
+import ru.semenovmy.learning.reminder.sorter.DateTimeSorter;
+import ru.semenovmy.learning.reminder.sorter.TitleSorter;
+
 import static ru.semenovmy.learning.reminder.MainRecyclerViewActivity.sItemPosition;
 
 /**
  * Класс адаптера для Recycler View
+ *
+ * @author Maxim Semenov on 2019-11-15
  */
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder>
-            /*implements Filterable */{
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder> {
 
     public final ArrayList<ReminderItem> mItems;
-    List<ReminderItem> reminderItemsFull;
+    public List<ReminderItem> mReminderItemsFull;
     public final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
-    private final MultiSelector mMultiSelector = new MultiSelector();
-    private int mTempPost;
+    public final MultiSelector mMultiSelector = new MultiSelector();
+    public int mTempPost;
     public List<TitleSorter> TitleSortList;
     public List<DateTimeSorter> DateTimeSortList;
     public ReminderDatabase mReminderDatabase;
-    MainRecyclerViewActivity mainRecyclerViewActivity;
-    private OnItemClickListener mOnItemClickListener;
-    Util util;
+    public MainRecyclerViewActivity mMainRecyclerViewActivity;
+    public OnItemClickListener mOnItemClickListener;
+    public Context context;
+    public int mLastPosition = -1;
+    public List<Reminder> mReminders;
 
-    RecyclerViewAdapter(Context context, OnItemClickListener listener) {
+    public RecyclerViewAdapter(Context context, OnItemClickListener listener) {
         mItems = new ArrayList<>();
-        reminderItemsFull = new ArrayList<>(mItems);
+        mReminderItemsFull = new ArrayList<>(mItems);
         mReminderDatabase = new ReminderDatabase(context);
-        mainRecyclerViewActivity = new MainRecyclerViewActivity();
+        mMainRecyclerViewActivity = new MainRecyclerViewActivity();
         mOnItemClickListener = listener;
-        util = new Util(context);
+        this.context = context;
     }
 
     /**
-    * Метод для установки количества элементов Recycler View
-    */
+     * Метод для установки количества элементов Recycler View
+     * @param count количество элементов
+     */
     void setItemCount(int count) {
         mItems.clear();
         mItems.addAll(generateListData(count));
@@ -64,16 +75,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     /**
-    * Метод для удаления элементов Recycler View
-    */
-    void onDeleteItem(int count) {
-        mItems.clear();
-        mItems.addAll(generateListData(count));
-    }
-
-    /**
-    * Метод для удаления выбранных элементов Recycler View
-    */
+     * Метод для удаления выбранных элементов Recycler View
+     * @param selected выбранный элемент
+     */
     void removeItemSelected(int selected) {
         if (mItems.isEmpty()) return;
         mItems.remove(selected);
@@ -96,8 +100,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         itemHolder.setReminderDateTime(item.mDateTime);
         itemHolder.setReminderRepeatInfo(item.mRepeat, item.mRepeatNo, item.mRepeatType);
         itemHolder.setActiveImage(item.mActive);
-
         itemHolder.bind();
+
+        setAnimation(itemHolder.itemView, position);
     }
 
     @Override
@@ -106,10 +111,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     /**
+     * Метод анимации сдвига списка слева направо
+     * @param viewToAnimate элемент для анимации
+     * @param position позиция элемента
+     */
+    private void setAnimation(View viewToAnimate, int position) {
+        // Если список ранее не был отображен, применится анимация
+        if (position > mLastPosition)
+        {
+            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
+            viewToAnimate.startAnimation(animation);
+            mLastPosition = position;
+        }
+    }
+
+    /**
     * Класс для UI и данных для Recycler View
     */
-    public class VerticalItemHolder extends SwappingHolder
-            implements View.OnLongClickListener {
+    public class VerticalItemHolder extends SwappingHolder {
 
         private final TextView mTitleText;
         private final TextView mDateAndTimeText;
@@ -123,9 +142,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         VerticalItemHolder(View itemView, RecyclerViewAdapter adapter) {
             super(itemView, mMultiSelector);
 
-            itemView.setOnLongClickListener(this);
-            itemView.setLongClickable(true);
-
             mAdapter = adapter;
 
             mTitleText = itemView.findViewById(R.id.recycle_title);
@@ -134,7 +150,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             mActiveImage = itemView.findViewById(R.id.active_image);
             mThumbnailImage = itemView.findViewById(R.id.thumbnail_image);
 
-            //util.generateListData(mainRecyclerViewActivity.getDefaultItemCount());
+            itemView.setOnLongClickListener(v -> {
+                PopupMenu menu = new PopupMenu(v.getContext(), v);
+                menu.inflate(R.menu.menu_delete);
+                menu.setOnMenuItemClickListener(menuItem -> {
+                    switch (menuItem.getItemId()) {
+                        case R.id.menu_item_delete:
+                            mReminderDatabase.deleteReminder(mReminders.get(getAdapterPosition()));
+                            removeItemSelected(getAdapterPosition());
+
+                            Toast.makeText(context, context.getString(R.string.reminder_deleted), Toast.LENGTH_SHORT).show();
+
+                        default:
+                    }
+                    return true;
+                });
+                menu.show();
+                return true;
+            });
         }
 
         void bind() {
@@ -144,24 +177,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     int mReminderClickID = mIDmap.get(mTempPost);
 
                     mOnItemClickListener.onClick(mReminderClickID);
-                } else if (mMultiSelector.getSelectedPositions().isEmpty()) {
-                    mAdapter.setItemCount(mainRecyclerViewActivity.getDefaultItemCount());
                 }
             });
         }
 
-        @Override
-        public boolean onLongClick(View v) {
-            AppCompatActivity activity = new MainRecyclerViewActivity();
-            activity.startSupportActionMode(mainRecyclerViewActivity.mDeleteMode);
-            mMultiSelector.setSelected(this, true);
-            v.setBackgroundColor(Color.DKGRAY);
-            return true;
-        }
-
         /**
-        * Метод для установки заголовка списка
-        */
+         * Метод для установки заголовка списка
+         * @param title устанавливаемый заголовок
+         */
         void setReminderTitle(String title) {
             mTitleText.setText(title);
             String letter = "A";
@@ -178,26 +201,31 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
 
         /**
-        * Метод для установки даты и времени списка
-        */
+         * Метод для установки даты и времени списка
+         * @param datetime устанавливаемые дата и время
+         */
         void setReminderDateTime(String datetime) {
             mDateAndTimeText.setText(datetime);
         }
 
         /**
-        * Метод для установки повторений напоминания в списке
-        */
+         * Метод для установки повторений напоминания в списке
+         * @param repeat повторять или нет
+         * @param repeatNo количество повторений
+         * @param repeatType тип повторений
+         */
         void setReminderRepeatInfo(String repeat, String repeatNo, String repeatType) {
             if (repeat.equals("true")) {
-                mRepeatInfoText.setText(R.string.every + " " + repeatNo + " " + repeatType);
+                mRepeatInfoText.setText(context.getString(R.string.every) + " " + repeatNo + " " + repeatType);
             } else if (repeat.equals("false")) {
                 mRepeatInfoText.setText(R.string.repeat_off);
             }
         }
 
         /**
-        * Метод для установки картинки для элемента списка
-        */
+         * Метод для установки картинки для элемента списка
+         * @param active активно ли напоминание
+         */
         void setActiveImage(String active) {
             if (active.equals("true")) {
                 mActiveImage.setImageResource(R.drawable.bell);
@@ -207,14 +235,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-    /**
-    * Метод для генерации данных списка
-    */
-    ArrayList<ReminderItem> items;
-   List<ReminderItem> generateListData(int count) {
-        items = new ArrayList<>();
+   /**
+   * * Метод для генерации данных списка
+   */
+   public List<ReminderItem> generateListData(int count) {
+       ArrayList<ReminderItem> items = new ArrayList<>();
 
-        List<Reminder> reminders = mReminderDatabase.getAllReminders();
+       mReminders = mReminderDatabase.getAllReminders();
 
         List<String> Titles = new ArrayList<>();
         List<String> Repeats = new ArrayList<>();
@@ -226,7 +253,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         DateTimeSortList = new ArrayList<>();
         TitleSortList = new ArrayList<>();
 
-        for (Reminder r : reminders) {
+        for (Reminder r : mReminders) {
             Titles.add(r.getTitle());
             DateAndTime.add(r.getDate() + " " + r.getTime());
             Repeats.add(r.getRepeat());
@@ -267,13 +294,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     items.add(new ReminderItem(Titles.get(i), DateAndTime.get(i), Repeats.get(i),
                             RepeatNos.get(i), RepeatTypes.get(i), Actives.get(i)));
                 } else if (Actives.get(i).equals("false")) {
-                    mReminderDatabase.deleteReminder(reminders.get(i));
+                    mReminderDatabase.deleteReminder(mReminders.get(i));
                 }
 
                 mIDmap.put(k, IDList.get(i));
                 k++;
             }
-            reminderItemsFull = items;
+            mReminderItemsFull = items;
         } else {
             for (TitleSorter item : TitleSortList) {
                 int i = item.getIndex();
@@ -282,7 +309,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     items.add(new ReminderItem(Titles.get(i), DateAndTime.get(i), Repeats.get(i),
                             RepeatNos.get(i), RepeatTypes.get(i), Actives.get(i)));
                 } else if (Actives.get(i).equals("false")) {
-                    mReminderDatabase.deleteReminder(reminders.get(i));
+                    mReminderDatabase.deleteReminder(mReminders.get(i));
                 }
 
                 mIDmap.put(k, IDList.get(i));
@@ -292,46 +319,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return items;
    }
 
-    /**
-    * Метод для фильтрации списка
-    */
-/*    @Override
-    public Filter getFilter() {
-        return filter;
-    }
-
-    private Filter filter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            List<ReminderItem> filteredList = new ArrayList<>();
-
-            if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(reminderItemsFull);
-            } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
-
-                for (ReminderItem item : reminderItemsFull) {
-                    if (item.mTitle.toLowerCase().contains(filterPattern)) {
-                        filteredList.add(item);
-                    }
-                }
-            }
-
-            FilterResults results = new FilterResults();
-            results.values = filteredList;
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            mItems.clear();
-            mItems.addAll((List)results.values);
-            notifyDataSetChanged();
-        }
-    };*/
-
-    public List<ReminderItem> getReminderItemsFull() {
-        return reminderItemsFull;
+    public List<ReminderItem> getmReminderItemsFull() {
+        return mReminderItemsFull;
     }
 
     public ArrayList<ReminderItem> getmItems() {

@@ -1,25 +1,25 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.sorter;
 
 /**
  * Модель для отображения данных TitleSorter
  *
  * @author Maxim Semenov on 2019-11-15
  */
-class TitleSorter {
+public class TitleSorter {
 
     private final int mIndex;
     private final String mTitle;
 
-    TitleSorter(int mIndex, String mTitle) {
+    public TitleSorter(int mIndex, String mTitle) {
         this.mIndex = mIndex;
         this.mTitle = mTitle;
     }
 
-    int getIndex() {
+    public int getIndex() {
         return mIndex;
     }
 
-    String getTitle() {
+    public String getTitle() {
         return mTitle;
     }
 }

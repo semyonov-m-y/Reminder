@@ -11,7 +11,6 @@
     <string name="repeat_off">Off</string>
     <string name="repeat_no">Repetition Interval</string>
     <string name="repeat_type">Type of Repetitions</string>
-    <string name="action_discard_reminder">Remove Your Reminder</string>
     <string name="action_save_reminder">Save Your Reminder</string>
     <string name="no_reminders">Please click on Float button to create a reminder</string>
     <string name="send_report">Send report via</string>
@@ -42,7 +41,6 @@
     <string name="select_type">Select Type</string>
     <string name="edited_text">Edited</string>
     <string name="not_blank">Reminder Title cannot be blank!</string>
-    <string name="discarded">Changes Discarded</string>
     <string name="enter_number">Enter Number</string>
     <string name="cancel">Cancel</string>
     <string name="saved">Saved</string>
@@ -66,6 +64,7 @@
     <string name="day">Day</string>
     <string name="week">Week</string>
     <string name="month">Month</string>
+    <string name="delete_reminder">Delete</string>
 
     <string-array name="app_color">
         <item>Default</item>

@@ -1,25 +1,25 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.sorter;
 
 /**
  * Модель для отображения DateTimeSorter данных
  *
  * @author Maxim Semenov on 2019-11-15
  */
-class DateTimeSorter {
+public class DateTimeSorter {
 
     private final int mIndex;
     private final String mDateTime;
 
-    DateTimeSorter(int index, String DateTime) {
+    public DateTimeSorter(int index, String DateTime) {
         this.mIndex = index;
         this.mDateTime = DateTime;
     }
 
-    int getIndex() {
+    public int getIndex() {
         return mIndex;
     }
 
-    String getDateTime() {
+    public String getDateTime() {
         return mDateTime;
     }
 }

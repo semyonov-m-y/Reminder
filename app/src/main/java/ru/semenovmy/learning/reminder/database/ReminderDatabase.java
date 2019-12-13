@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -62,6 +62,8 @@ public class ReminderDatabase extends SQLiteOpenHelper {
 
     /**
      * Метод для добавления напоминания
+     * @param reminder добавляемое напоминание
+     * @return возвращается номер добавленного напоминания
      */
     public int addReminder(Reminder reminder) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -82,7 +84,9 @@ public class ReminderDatabase extends SQLiteOpenHelper {
     }
 
     /**
-     * Метод для получения напоминания
+     * Метод для получения напоминания по номеру
+     * @param id номер напоминания
+     * @return возвращается напоминание
      */
     public Reminder getReminder(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -112,10 +116,10 @@ public class ReminderDatabase extends SQLiteOpenHelper {
 
     /**
      * Метод для получения всех напоминаний
+     * @return возвращается список всех напоминаний
      */
     public List<Reminder> getAllReminders() {
         List<Reminder> reminderList = new ArrayList<>();
-
         String selectQuery = "SELECT * FROM " + TABLE_REMINDERS;
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -142,6 +146,8 @@ public class ReminderDatabase extends SQLiteOpenHelper {
 
     /**
      * Метод для обновления напоминания
+     * @param reminder редактируемое напоминание
+     * @return возвращается номер измененного напоминания
      */
     public int updateReminder(Reminder reminder) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -160,6 +166,7 @@ public class ReminderDatabase extends SQLiteOpenHelper {
 
     /**
      * Метод для удаления напоминания
+     * @param reminder удаляемое напоминание
      */
     public void deleteReminder(Reminder reminder) {
         SQLiteDatabase db = this.getWritableDatabase();

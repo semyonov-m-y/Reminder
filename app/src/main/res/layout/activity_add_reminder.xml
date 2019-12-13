@@ -87,7 +87,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:src="@android:drawable/ic_menu_camera"
-                    android:contentDescription="@string/make_photo_button" />
+                    android:contentDescription="@string/make_photo_button"
+                    android:clickable="true"
+                    android:focusable="true"/>
             </LinearLayout>
 
             <RelativeLayout

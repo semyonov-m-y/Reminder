@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.utils;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -10,8 +10,15 @@ import android.graphics.Point;
  *
  * @author Maxim Semenov on 2019-11-15
  */
-class PictureUtils {
+public class PictureUtils {
 
+    /**
+     * Метод оптимизации размера добавляемого фото
+     * @param path путь к файлу
+     * @param destWidth необходимая ширина фото
+     * @param destHeight необходимая высота фото
+     * @return
+     */
     private static Bitmap getScaledBitmap(String path, int destWidth, int destHeight) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;

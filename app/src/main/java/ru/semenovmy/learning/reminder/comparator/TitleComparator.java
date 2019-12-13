@@ -1,13 +1,15 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.comparator;
 
 import java.util.Comparator;
+
+import ru.semenovmy.learning.reminder.sorter.TitleSorter;
 
 /**
  * Класс для сравнения заголовков, чтобы элементы списка были отсортированы в возрастающем порядке
  *
  * @author Maxim Semenov on 2019-11-15
  */
-class TitleComparator implements Comparator {
+public class TitleComparator implements Comparator {
 
     @Override
     public int compare(Object o1, Object o2) {

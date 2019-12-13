@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder;
+package ru.semenovmy.learning.reminder.receiver;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -16,6 +16,11 @@ import android.net.Uri;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import java.util.Calendar;
+
+import ru.semenovmy.learning.reminder.R;
+import ru.semenovmy.learning.reminder.ReminderEditActivity;
+import ru.semenovmy.learning.reminder.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.database.Reminder;
 
 /**
  * Класс для установки напоминания
