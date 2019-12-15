@@ -37,7 +37,6 @@
     <string name="every">Every</string>
     <string name="choose_action">Choose next action:</string>
     <string name="make_photo">Make photo</string>
-    <string name="add_from_gallery">Add from gallery</string>
     <string name="select_type">Select Type</string>
     <string name="edited_text">Edited</string>
     <string name="not_blank">Reminder Title cannot be blank!</string>
@@ -57,14 +56,14 @@
     <string name="action_save_reminder_button">Save your reminder button</string>
     <string name="is_not_active">Reminder deactivation button. It will be deleted from list</string>
     <string name="repeat_type_button">Choose repeat type button</string>
-    <string name="default_repeat_type">Hour</string>
     <string name="reminder_deleted">Deleted</string>
     <string name="minute">Minute</string>
     <string name="hour">Hour</string>
     <string name="day">Day</string>
     <string name="week">Week</string>
-    <string name="month">Month</string>
     <string name="delete_reminder">Delete</string>
+    <string name="create_reminder_first">Create reminder first and save it. Then you will be able to add your photo.</string>
+    <string name="ok">OK</string>
 
     <string-array name="app_color">
         <item>Default</item>

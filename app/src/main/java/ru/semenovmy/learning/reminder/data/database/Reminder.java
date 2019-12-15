@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder.database;
+package ru.semenovmy.learning.reminder.data.database;
 
 /**
  * Модель для получения напоминания

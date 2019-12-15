@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder.model;
+package ru.semenovmy.learning.reminder.data.model;
 
 import androidx.annotation.StringRes;
 

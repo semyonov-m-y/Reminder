@@ -8,8 +8,8 @@ import java.util.Calendar;
 import java.util.List;
 
 import ru.semenovmy.learning.reminder.R;
-import ru.semenovmy.learning.reminder.database.ReminderDatabase;
-import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
 
 /**
  * Класс для загрузки напоминания
@@ -23,7 +23,6 @@ public class BootReceiver extends BroadcastReceiver {
     private static final long sMilHour = 3600000L;
     private static final long sMilDay = 86400000L;
     private static final long sMilWeek = 604800000L;
-    private static final long sMilMonth = 2592000000L;
 
     private Calendar mCalendar;
     private int mYear, mMonth, mHour, mMinute, mDay, mReceivedID;
@@ -85,8 +84,6 @@ public class BootReceiver extends BroadcastReceiver {
                     mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilDay;
                 } else if (mRepeatType.equals(R.string.week)) {
                     mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilWeek;
-                } else if (mRepeatType.equals(R.string.month)) {
-                    mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMonth;
                 }
 
                 // Создание напоминания

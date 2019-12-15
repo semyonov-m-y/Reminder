@@ -26,9 +26,9 @@ import java.util.List;
 
 import ru.semenovmy.learning.reminder.comparator.DateTimeComparator;
 import ru.semenovmy.learning.reminder.comparator.TitleComparator;
-import ru.semenovmy.learning.reminder.database.ReminderDatabase;
-import ru.semenovmy.learning.reminder.database.Reminder;
-import ru.semenovmy.learning.reminder.model.ReminderItem;
+import ru.semenovmy.learning.reminder.data.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.data.model.ReminderItem;
 import ru.semenovmy.learning.reminder.sorter.DateTimeSorter;
 import ru.semenovmy.learning.reminder.sorter.TitleSorter;
 
@@ -44,7 +44,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public final ArrayList<ReminderItem> mItems;
     public List<ReminderItem> mReminderItemsFull;
     public final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
-    public final MultiSelector mMultiSelector = new MultiSelector();
+    public final MultiSelector mSelector = new MultiSelector();
     public int mTempPost;
     public List<TitleSorter> TitleSortList;
     public List<DateTimeSorter> DateTimeSortList;
@@ -66,16 +66,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     /**
      * Метод для установки количества элементов Recycler View
+     *
      * @param count количество элементов
      */
     void setItemCount(int count) {
         mItems.clear();
-        mItems.addAll(generateListData(count));
+        mItems.addAll(getListData(count));
         notifyDataSetChanged();
     }
 
     /**
      * Метод для удаления выбранных элементов Recycler View
+     *
      * @param selected выбранный элемент
      */
     void removeItemSelected(int selected) {
@@ -98,7 +100,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         ReminderItem item = mItems.get(position);
         itemHolder.setReminderTitle(item.mTitle);
         itemHolder.setReminderDateTime(item.mDateTime);
-        itemHolder.setReminderRepeatInfo(item.mRepeat, item.mRepeatNo, item.mRepeatType);
+        itemHolder.setReminderRepeatInfo(item.mRepeat, item.mRepeatNo, item.mRepeatType.substring(0, 1).toLowerCase() + ".");
         itemHolder.setActiveImage(item.mActive);
         itemHolder.bind();
 
@@ -112,13 +114,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     /**
      * Метод анимации сдвига списка слева направо
+     *
      * @param viewToAnimate элемент для анимации
-     * @param position позиция элемента
+     * @param position      позиция элемента
      */
     private void setAnimation(View viewToAnimate, int position) {
         // Если список ранее не был отображен, применится анимация
-        if (position > mLastPosition)
-        {
+        if (position > mLastPosition) {
             Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
             viewToAnimate.startAnimation(animation);
             mLastPosition = position;
@@ -126,8 +128,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     /**
-    * Класс для UI и данных для Recycler View
-    */
+     * Класс для UI и данных для Recycler View
+     */
     public class VerticalItemHolder extends SwappingHolder {
 
         private final TextView mTitleText;
@@ -140,7 +142,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final RecyclerViewAdapter mAdapter;
 
         VerticalItemHolder(View itemView, RecyclerViewAdapter adapter) {
-            super(itemView, mMultiSelector);
+            super(itemView, mSelector);
 
             mAdapter = adapter;
 
@@ -160,7 +162,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                             removeItemSelected(getAdapterPosition());
 
                             Toast.makeText(context, context.getString(R.string.reminder_deleted), Toast.LENGTH_SHORT).show();
-
                         default:
                     }
                     return true;
@@ -172,7 +173,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         void bind() {
             itemView.setOnClickListener(v -> {
-                if (!mMultiSelector.tapSelection(this)) {
+                if (!mSelector.tapSelection(this)) {
                     mTempPost = getAdapterPosition();
                     int mReminderClickID = mIDmap.get(mTempPost);
 
@@ -183,6 +184,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         /**
          * Метод для установки заголовка списка
+         *
          * @param title устанавливаемый заголовок
          */
         void setReminderTitle(String title) {
@@ -202,6 +204,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         /**
          * Метод для установки даты и времени списка
+         *
          * @param datetime устанавливаемые дата и время
          */
         void setReminderDateTime(String datetime) {
@@ -210,8 +213,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         /**
          * Метод для установки повторений напоминания в списке
-         * @param repeat повторять или нет
-         * @param repeatNo количество повторений
+         *
+         * @param repeat     повторять или нет
+         * @param repeatNo   количество повторений
          * @param repeatType тип повторений
          */
         void setReminderRepeatInfo(String repeat, String repeatNo, String repeatType) {
@@ -224,6 +228,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         /**
          * Метод для установки картинки для элемента списка
+         *
          * @param active активно ли напоминание
          */
         void setActiveImage(String active) {
@@ -235,13 +240,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
     }
 
-   /**
-   * * Метод для генерации данных списка
-   */
-   public List<ReminderItem> generateListData(int count) {
-       ArrayList<ReminderItem> items = new ArrayList<>();
+    /**
+     * * Метод для генерации данных списка
+     */
+    public List<ReminderItem> getListData(int count) {
+        ArrayList<ReminderItem> items = new ArrayList<>();
 
-       mReminders = mReminderDatabase.getAllReminders();
+        mReminders = mReminderDatabase.getAllReminders();
 
         List<String> Titles = new ArrayList<>();
         List<String> Repeats = new ArrayList<>();
@@ -271,17 +276,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             key++;
         }
 
-        if (sItemPosition == 0) {
-            Collections.sort(DateTimeSortList, new DateTimeComparator());
-        } else if (sItemPosition == 1) {
-            Collections.sort(DateTimeSortList, new DateTimeComparator());
-            Collections.reverse(DateTimeSortList);
-        } else if (sItemPosition == 2) {
-            Collections.sort(TitleSortList, new TitleComparator());
-        } else if (sItemPosition == 3) {
-            Collections.sort(TitleSortList, new TitleComparator());
-            Collections.reverse(TitleSortList);
-        }
+        listSort(sItemPosition);
 
         int k = 0;
 
@@ -317,7 +312,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         }
         return items;
-   }
+    }
 
     public List<ReminderItem> getmReminderItemsFull() {
         return mReminderItemsFull;
@@ -325,5 +320,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public ArrayList<ReminderItem> getmItems() {
         return mItems;
+    }
+
+    /**
+     * Метод для сортировки списка
+     * @param position выбор элемента spinner-а
+     * @return возвращает номер позиции элемента
+     */
+    public int listSort(int position) {
+        if (position == 0) {
+            Collections.sort(DateTimeSortList, new DateTimeComparator());
+        } else if (position == 1) {
+            Collections.sort(DateTimeSortList, new DateTimeComparator());
+            Collections.reverse(DateTimeSortList);
+        } else if (position == 2) {
+            Collections.sort(TitleSortList, new TitleComparator());
+        } else if (position == 3) {
+            Collections.sort(TitleSortList, new TitleComparator());
+            Collections.reverse(TitleSortList);
+        }
+        return position;
     }
 }

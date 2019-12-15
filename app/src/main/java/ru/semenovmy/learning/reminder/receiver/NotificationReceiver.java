@@ -20,8 +20,8 @@ import java.util.Calendar;
 
 import ru.semenovmy.learning.reminder.R;
 import ru.semenovmy.learning.reminder.ReminderEditActivity;
-import ru.semenovmy.learning.reminder.database.ReminderDatabase;
-import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 

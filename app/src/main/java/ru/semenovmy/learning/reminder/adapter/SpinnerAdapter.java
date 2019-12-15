@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import ru.semenovmy.learning.reminder.model.DisplayMode;
+import ru.semenovmy.learning.reminder.data.model.DisplayMode;
 
 /**
  * Класс для spinner-адаптера

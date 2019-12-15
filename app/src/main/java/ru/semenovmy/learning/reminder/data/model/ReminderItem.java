@@ -1,4 +1,4 @@
-package ru.semenovmy.learning.reminder.model;
+package ru.semenovmy.learning.reminder.data.model;
 
 /**
  * Класс для элементов recycler view

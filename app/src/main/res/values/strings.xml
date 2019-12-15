@@ -34,14 +34,13 @@
     <string name="photo_view">Картинка</string>
     <string name="make_photo_button">Кнопка добавления фото</string>
     <string name="list_item_image">Картинка элемента списка</string>
-    <string name="every">Каждый (ую)</string>
+    <string name="every">Раз в</string>
     <string name="choose_action">Выбери дальнейшее действие:</string>
     <string name="make_photo">Сделать фото</string>
-    <string name="add_from_gallery">Фото из галереи</string>
     <string name="select_type">Выбрать тип</string>
     <string name="edited_text">Редактирован</string>
     <string name="not_blank">Напоминание не может быть пустым!</string>
-    <string name="enter_number">Введите цифру</string>
+    <string name="enter_number">Введите число</string>
     <string name="cancel">Отмена</string>
     <string name="saved">Сохранён</string>
     <string name="color_green">Зелёный</string>
@@ -57,14 +56,14 @@
     <string name="action_save_reminder_button">Кнопка сохранения напоминания</string>
     <string name="is_not_active">Кнопка деактивации напоминания. Напоминание будет удалено из списка</string>
     <string name="repeat_type_button">Кнопка выбора типа повторения напоминания</string>
-    <string name="default_repeat_type">Час</string>
     <string name="reminder_deleted">Удалён</string>
     <string name="minute">Минута</string>
     <string name="hour">Час</string>
     <string name="day">День</string>
     <string name="week">Неделя</string>
-    <string name="month">Месяц</string>
     <string name="delete_reminder">Удалить</string>
+    <string name="create_reminder_first">Сначала создайте и сохраните напоминание, а потом добавьте фотографию</string>
+    <string name="ok">ОК</string>
 
     <string-array name="app_color">
         <item>По умолчанию</item>

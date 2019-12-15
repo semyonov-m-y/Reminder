@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -18,12 +19,14 @@ import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
-import ru.semenovmy.learning.reminder.database.ReminderDatabase;
-import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
 import ru.semenovmy.learning.reminder.receiver.NotificationReceiver;
+import ru.semenovmy.learning.reminder.utils.PictureUtils;
 
 /**
  * Класс для редактирования элемента Recycler View
@@ -41,6 +44,7 @@ public class ReminderEditActivity extends ReminderAddActivity implements
     private ReminderDatabase mReminderDatabase;
     private String[] mDateSplit, mTimeSplit;
     private Switch mRepeatSwitch;
+    public File mPhotoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,13 +182,12 @@ public class ReminderEditActivity extends ReminderAddActivity implements
 
         mPhotoButton.setEnabled(canTakePhoto);
         mPhotoButton.setOnClickListener(view -> {
-            Uri uri = FileProvider.getUriForFile(getApplicationContext(),
-                    "ru.semenovmy.learning.reminder", mPhotoFile);
-
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(getString(R.string.choose_action));
-            builder.setNegativeButton(getString(R.string.make_photo),
+            builder.setPositiveButton(getString(R.string.make_photo),
                     (dialog, which) -> {
+                        Uri uri = FileProvider.getUriForFile(getApplicationContext(),
+                                "ru.semenovmy.learning.reminder", mPhotoFile);
                         captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                         List<ResolveInfo> cameraActivities = getApplicationContext()
                                 .getPackageManager().queryIntentActivities(captureImage,
@@ -195,15 +198,26 @@ public class ReminderEditActivity extends ReminderAddActivity implements
                         }
                         startActivityForResult(captureImage, REQUEST_PHOTO);
                     });
-            builder.setNeutralButton(getString(R.string.add_from_gallery),
-                    (dialog, which) -> pickFromGallery());
-           // mPhotoView.setImageURI(uri);
+            builder.setNegativeButton(R.string.cancel,
+                    (dialog, id) -> dialog.cancel());
             builder.show();
         });
 
         updatePhotoView();
 
         setUpColorSetting();
+    }
+
+    /**
+     * Метод для обновления фото на View
+     */
+    public void updatePhotoView() {
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+            mPhotoView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), this);
+            mPhotoView.setImageBitmap(bitmap);
+        }
     }
 
     @Override
@@ -215,13 +229,6 @@ public class ReminderEditActivity extends ReminderAddActivity implements
             switch (requestCode) {
                 case GALLERY_REQUEST_CODE:
                     Uri selectedImage = data.getData();
-                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-/*                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                    cursor.moveToFirst();
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String imgDecodableString = cursor.getString(columnIndex);
-                    cursor.close();*/
 
                     mPhotoView.setImageURI(selectedImage);
                     break;
@@ -263,8 +270,6 @@ public class ReminderEditActivity extends ReminderAddActivity implements
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilDay;
         } else if (mRepeatType.equals(getString(R.string.week))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilWeek;
-        } else if (mRepeatType.equals(getString(R.string.month))) {
-            mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMonth;
         }
 
         // Создаем новое напоминание

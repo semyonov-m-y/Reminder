@@ -18,15 +18,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.getbase.floatingactionbutton.FloatingActionButton;
+
 import java.util.List;
 
 import ru.semenovmy.learning.reminder.adapter.SpinnerAdapter;
-import ru.semenovmy.learning.reminder.database.ReminderDatabase;
-import ru.semenovmy.learning.reminder.database.Reminder;
-import ru.semenovmy.learning.reminder.model.ReminderItem;
+import ru.semenovmy.learning.reminder.data.model.ReminderItem;
 import ru.semenovmy.learning.reminder.receiver.BootReceiver;
 import ru.semenovmy.learning.reminder.receiver.NotificationReceiver;
+import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
+import ru.semenovmy.learning.reminder.data.database.Reminder;
 
 /**
  * Main class for recycler view
@@ -93,14 +95,6 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     }
 
     /**
-     * Метод для создания меню при долгом нажатии на элемент Recycler View
-     */
-/*    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        getMenuInflater().inflate(R.menu.menu_delete_reminder, menu);
-    }*/
-
-    /**
      * Метод для создания Recycler View
      */
     public void createRecyclerView() {
@@ -112,7 +106,6 @@ public class MainRecyclerViewActivity extends AppCompatActivity
         myAsyncTask = new MyAsyncTask();
         myAsyncTask.execute();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -252,7 +245,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     /**
      * Метод для установки цвета страницы
      */
-    private void setUpDefaultSetting() {
+    public void setUpDefaultSetting() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
@@ -272,6 +265,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mNotificationReceiver);
+        unregisterReceiver(mBootReceiver);
     }
 
     /**
@@ -290,7 +284,7 @@ public class MainRecyclerViewActivity extends AppCompatActivity
 
         @Override
         protected List<ReminderItem> doInBackground(Integer... voids) {
-            return mAdapter.generateListData(mAdapter.getItemCount());
+            return mAdapter.getListData(mAdapter.getItemCount());
         }
     }
 }

@@ -1,17 +1,11 @@
 package ru.semenovmy.learning.reminder;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -29,7 +23,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
@@ -38,12 +31,10 @@ import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.List;
 
-import ru.semenovmy.learning.reminder.database.ReminderDatabase;
-import ru.semenovmy.learning.reminder.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
 import ru.semenovmy.learning.reminder.receiver.NotificationReceiver;
-import ru.semenovmy.learning.reminder.utils.PictureUtils;
 
 /**
  * Класс для добавления элемента Recycler View
@@ -67,7 +58,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     static final long sMilHour = 3600000L;
     static final long sMilDay = 86400000L;
     static final long sMilWeek = 604800000L;
-    static final long sMilMonth = 2592000000L;
 
     static final int REQUEST_PHOTO = 2;
     final int GALLERY_REQUEST_CODE = 0;
@@ -77,7 +67,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     public Button mReportButton;
     public Calendar mCalendar;
     public EditText mTitleText;
-    public File mPhotoFile;
     public FloatingActionButton mFloatingActionButton1, mFloatingActionButton2;
     public ImageButton mPhotoButton;
     public ImageView mPhotoView;
@@ -113,7 +102,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         mActive = "true";
         mRepeat = "true";
         mRepeatAmount = Integer.toString(1);
-        mRepeatType = getString(R.string.default_repeat_type);
+        mRepeatType = getString(R.string.hour);
 
         mCalendar = Calendar.getInstance();
         mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
@@ -187,7 +176,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
 
         // Добавляем кнопку отправки напоминания по почте
         mReportButton = findViewById(R.id.note_report);
-        mReportButton.setOnClickListener(v12 -> {
+        mReportButton.setOnClickListener(view -> {
             Intent i = new Intent(Intent.ACTION_SEND);
             i.setType("text/plain");
             i.putExtra(Intent.EXTRA_TEXT, mTitleText.getText() + " - " + mDateText.getText() + " - " + mTimeText.getText());
@@ -198,42 +187,16 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         // Обрабатываем работу с картинкой
         if (get(getApplicationContext()).getAllReminders() == null) {
             mReminder = get(getApplicationContext()).getAllReminders().get(mID);
-            mPhotoFile = getPhotoFile(mReminder);
         }
 
-        PackageManager packageManager = getPackageManager();
         mPhotoButton = findViewById(R.id.note_camera);
-
-        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        boolean canTakePhoto = mPhotoFile != null &&
-                captureImage.resolveActivity(packageManager) != null;
-
-        mPhotoButton.setEnabled(canTakePhoto);
         mPhotoButton.setOnClickListener(view -> {
-            Uri uri = FileProvider.getUriForFile(getApplicationContext(),
-                    "ru.semenovmy.learning.reminder", mPhotoFile);
-
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(getString(R.string.choose_action));
-            builder.setNegativeButton(getString(R.string.make_photo),
-                    (dialog, which) -> {
-                        captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                        List<ResolveInfo> cameraActivities = getApplicationContext()
-                                .getPackageManager().queryIntentActivities(captureImage,
-                                        PackageManager.MATCH_DEFAULT_ONLY);
-                        for (ResolveInfo activity : cameraActivities) {
-                            getApplicationContext().grantUriPermission(activity.activityInfo.packageName,
-                                    uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        }
-                        startActivityForResult(captureImage, REQUEST_PHOTO);
-                    });
-            builder.setNeutralButton(getString(R.string.add_from_gallery),
-                    (dialog, which) -> pickFromGallery());
-            //mPhotoView.setImageURI(uri);
+            builder.setMessage(getString(R.string.create_reminder_first));
+            builder.setNegativeButton(R.string.cancel,
+                    (dialog, id) -> dialog.cancel());
             builder.show();
         });
-
-        updatePhotoView();
 
         setUpColorSetting();
     }
@@ -253,42 +216,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
             sBase = new ReminderDatabase(context);
         }
         return sBase;
-    }
-
-    /**
-     * Метод для получения фото из галереи
-     */
-    void pickFromGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-
-        // Устанавливаем допустимые типы фото
-        String[] mimeTypes = {"image/jpg", "image/png"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-        startActivityForResult(intent, GALLERY_REQUEST_CODE);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Результат RESULT_OK только если выбрано фото
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case GALLERY_REQUEST_CODE:
-                    Uri selectedImage = data.getData();
-                    String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-/*                    Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                    cursor.moveToFirst();
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String imgDecodableString = cursor.getString(columnIndex);
-                    cursor.close();*/
-
-                    mPhotoView.setImageURI(selectedImage);
-                    break;
-            }
-        }
     }
 
     /**
@@ -405,18 +332,16 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
      * Метод для получения реакции на нажатие переключателя типа повторения напоминания
      */
     public void selectRepeatType(View v) {
-        final String[] items = new String[5];
+        final String[] items = new String[4];
 
         items[0] = getString(R.string.minute);
         items[1] = getString(R.string.hour);
         items[2] = getString(R.string.day);
         items[3] = getString(R.string.week);
-        items[4] = getString(R.string.month);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.select_type));
         builder.setItems(items, (dialog, item) -> {
-
             mRepeatType = items[item];
             mRepeatTypeText.setText(mRepeatType);
             mRepeatText.setText(getString(R.string.every) + " " + mRepeatAmount + " " + mRepeatType);
@@ -433,11 +358,11 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         alert.setTitle(getString(R.string.enter_number));
 
         final EditText input = new EditText(this);
+        input.setText("1");
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         alert.setView(input);
         alert.setPositiveButton(getString(R.string.ok),
                 (dialog, whichButton) -> {
-
                     if (input.getText().toString().length() == 0) {
                         mRepeatAmount = Integer.toString(1);
                         mRepeatAmountText.setText(mRepeatAmount);
@@ -479,8 +404,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilDay;
         } else if (mRepeatType.equals(getString(R.string.week))) {
             mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilWeek;
-        } else if (mRepeatType.equals(getString(R.string.month))) {
-            mRepeatTime = Integer.parseInt(mRepeatAmount) * sMilMonth;
         }
 
         // Создаем новое напоминание
@@ -543,18 +466,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         outState.putCharSequence(KEY_REPEAT_NO, mRepeatAmountText.getText());
         outState.putCharSequence(KEY_REPEAT_TYPE, mRepeatTypeText.getText());
         outState.putCharSequence(KEY_ACTIVE, mActive);
-    }
-
-    /**
-     * Метод для обновления фото на View
-     */
-    public void updatePhotoView() {
-        if (mPhotoFile == null || !mPhotoFile.exists()) {
-            mPhotoView.setImageDrawable(null);
-        } else {
-            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), this);
-            mPhotoView.setImageBitmap(bitmap);
-        }
     }
 
     /**

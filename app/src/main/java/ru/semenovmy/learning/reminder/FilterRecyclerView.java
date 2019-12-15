@@ -7,9 +7,7 @@ import android.widget.Filterable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.semenovmy.learning.reminder.OnItemClickListener;
-import ru.semenovmy.learning.reminder.RecyclerViewAdapter;
-import ru.semenovmy.learning.reminder.model.ReminderItem;
+import ru.semenovmy.learning.reminder.data.model.ReminderItem;
 
 /**
  * Класс для фильтрации Recycler View
@@ -20,7 +18,7 @@ public class FilterRecyclerView extends RecyclerViewAdapter implements Filterabl
 
     public FilterRecyclerView(Context context, OnItemClickListener listener) {
         super(context, listener);
-        generateListData(getItemCount());
+        getListData(getItemCount());
     }
 
     @Override
