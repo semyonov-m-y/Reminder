@@ -14,9 +14,9 @@ import ru.semenovmy.learning.reminder.data.model.ReminderItem;
  *
  * @author Maxim Semenov on 2019-11-15
  */
-public class FilterRecyclerView extends RecyclerViewAdapter implements Filterable {
+class FilterRecyclerView extends RecyclerViewAdapter implements Filterable {
 
-    public FilterRecyclerView(Context context, OnItemClickListener listener) {
+    FilterRecyclerView(Context context, OnItemClickListener listener) {
         super(context, listener);
         getListData(getItemCount());
     }
@@ -26,17 +26,17 @@ public class FilterRecyclerView extends RecyclerViewAdapter implements Filterabl
         return filter;
     }
 
-    public Filter filter = new Filter() {
+    private final Filter filter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<ReminderItem> filteredList = new ArrayList<>();
 
             if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(getmReminderItemsFull());
+                filteredList.addAll(getReminderItemsFull());
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
 
-                for (ReminderItem item : getmReminderItemsFull()) {
+                for (ReminderItem item : getReminderItemsFull()) {
                     if (item.mTitle.toLowerCase().contains(filterPattern)) {
                         filteredList.add(item);
                     }
@@ -50,8 +50,8 @@ public class FilterRecyclerView extends RecyclerViewAdapter implements Filterabl
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            getmItems().clear();
-            getmItems().addAll((List) results.values);
+            getItems().clear();
+            getItems().addAll((List) results.values);
             notifyDataSetChanged();
         }
     };

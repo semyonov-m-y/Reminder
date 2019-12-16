@@ -41,49 +41,28 @@ import static ru.semenovmy.learning.reminder.MainRecyclerViewActivity.sItemPosit
  */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.VerticalItemHolder> {
 
-    public final ArrayList<ReminderItem> mItems;
-    public List<ReminderItem> mReminderItemsFull;
-    public final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
-    public final MultiSelector mSelector = new MultiSelector();
-    public int mTempPost;
-    public List<TitleSorter> TitleSortList;
-    public List<DateTimeSorter> DateTimeSortList;
-    public ReminderDatabase mReminderDatabase;
-    public MainRecyclerViewActivity mMainRecyclerViewActivity;
-    public OnItemClickListener mOnItemClickListener;
-    public Context context;
-    public int mLastPosition = -1;
-    public List<Reminder> mReminders;
+    private final ArrayList<ReminderItem> mItems;
+    private final LinkedHashMap<Integer, Integer> mIDmap = new LinkedHashMap<>();
+    private final MultiSelector mSelector = new MultiSelector();
+    private final Context context;
+    private final MainRecyclerViewActivity mMainRecyclerViewActivity;
+    private final OnItemClickListener mOnItemClickListener;
+    private final ReminderDatabase mReminderDatabase;
 
-    public RecyclerViewAdapter(Context context, OnItemClickListener listener) {
+    private int mTempPost;
+    private int mLastPosition = -1;
+    private List<ReminderItem> mReminderItemsFull;
+    private List<TitleSorter> TitleSortList;
+    private List<DateTimeSorter> DateTimeSortList;
+    private List<Reminder> mReminders;
+
+    RecyclerViewAdapter(Context context, OnItemClickListener listener) {
         mItems = new ArrayList<>();
         mReminderItemsFull = new ArrayList<>(mItems);
         mReminderDatabase = new ReminderDatabase(context);
         mMainRecyclerViewActivity = new MainRecyclerViewActivity();
         mOnItemClickListener = listener;
         this.context = context;
-    }
-
-    /**
-     * Метод для установки количества элементов Recycler View
-     *
-     * @param count количество элементов
-     */
-    void setItemCount(int count) {
-        mItems.clear();
-        mItems.addAll(getListData(count));
-        notifyDataSetChanged();
-    }
-
-    /**
-     * Метод для удаления выбранных элементов Recycler View
-     *
-     * @param selected выбранный элемент
-     */
-    void removeItemSelected(int selected) {
-        if (mItems.isEmpty()) return;
-        mItems.remove(selected);
-        notifyItemRemoved(selected);
     }
 
     @NonNull
@@ -113,24 +92,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     /**
-     * Метод анимации сдвига списка слева направо
-     *
-     * @param viewToAnimate элемент для анимации
-     * @param position      позиция элемента
-     */
-    private void setAnimation(View viewToAnimate, int position) {
-        // Если список ранее не был отображен, применится анимация
-        if (position > mLastPosition) {
-            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
-            viewToAnimate.startAnimation(animation);
-            mLastPosition = position;
-        }
-    }
-
-    /**
      * Класс для UI и данных для Recycler View
      */
-    public class VerticalItemHolder extends SwappingHolder {
+    class VerticalItemHolder extends SwappingHolder {
 
         private final TextView mTitleText;
         private final TextView mDateAndTimeText;
@@ -173,9 +137,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         void bind() {
             itemView.setOnClickListener(v -> {
+                int mReminderClickID = 0;
                 if (!mSelector.tapSelection(this)) {
                     mTempPost = getAdapterPosition();
-                    int mReminderClickID = mIDmap.get(mTempPost);
+                    if (mIDmap.get(mTempPost) != null) {
+                        mReminderClickID = mIDmap.get(mTempPost);
+                    }
 
                     mOnItemClickListener.onClick(mReminderClickID);
                 }
@@ -243,7 +210,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     /**
      * * Метод для генерации данных списка
      */
-    public List<ReminderItem> getListData(int count) {
+    List<ReminderItem> getListData(int count) {
         ArrayList<ReminderItem> items = new ArrayList<>();
 
         mReminders = mReminderDatabase.getAllReminders();
@@ -314,20 +281,41 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return items;
     }
 
-    public List<ReminderItem> getmReminderItemsFull() {
+    List<ReminderItem> getReminderItemsFull() {
         return mReminderItemsFull;
     }
 
-    public ArrayList<ReminderItem> getmItems() {
+    ArrayList<ReminderItem> getItems() {
         return mItems;
+    }
+
+    /**
+     * Метод для установки количества элементов Recycler View
+     *
+     * @param count количество элементов
+     */
+    void setItemCount(int count) {
+        mItems.clear();
+        mItems.addAll(getListData(count));
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Метод для удаления выбранных элементов Recycler View
+     *
+     * @param selected выбранный элемент
+     */
+    private void removeItemSelected(int selected) {
+        if (mItems.isEmpty()) return;
+        mItems.remove(selected);
+        notifyItemRemoved(selected);
     }
 
     /**
      * Метод для сортировки списка
      * @param position выбор элемента spinner-а
-     * @return возвращает номер позиции элемента
      */
-    public int listSort(int position) {
+    private void listSort(int position) {
         if (position == 0) {
             Collections.sort(DateTimeSortList, new DateTimeComparator());
         } else if (position == 1) {
@@ -339,6 +327,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Collections.sort(TitleSortList, new TitleComparator());
             Collections.reverse(TitleSortList);
         }
-        return position;
+    }
+
+    /**
+     * Метод анимации сдвига списка слева направо
+     *
+     * @param viewToAnimate элемент для анимации
+     * @param position      позиция элемента
+     */
+    private void setAnimation(View viewToAnimate, int position) {
+        // Если список ранее не был отображен, применится анимация
+        if (position > mLastPosition) {
+            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
+            viewToAnimate.startAnimation(animation);
+            mLastPosition = position;
+        }
     }
 }

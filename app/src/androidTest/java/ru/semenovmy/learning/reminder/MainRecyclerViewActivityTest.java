@@ -14,14 +14,14 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 @RunWith(AndroidJUnit4.class)
 public class MainRecyclerViewActivityTest {
 
-    MainPage mainPage = new MainPage();
+    private final MainPage mainPage = new MainPage();
 
     @Rule
     public ActivityTestRule<MainRecyclerViewActivity> activityTestRule = new ActivityTestRule<>(MainRecyclerViewActivity.class);
 
     @Test
     public void checkAddButton() {
-        mainPage.getmAddReminderButton().check(matches(isDisplayed()));
-        mainPage.getmAddReminderButton().perform(click());
+        mainPage.getAddReminderButton().check(matches(isDisplayed()));
+        mainPage.getAddReminderButton().perform(click());
     }
 }

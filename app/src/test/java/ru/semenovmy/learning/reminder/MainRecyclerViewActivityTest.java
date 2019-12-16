@@ -25,13 +25,13 @@ public class MainRecyclerViewActivityTest {
     private Context context;
     @Mock
     private OnItemClickListener onItemClickListener;
-    private String mDateTime1 = "charCode1";
-    private String mRepeatType1 = "Hour";
-    private String mDateTime2 = "charCode2";
-    private String mRepeatType2 = "Week";
-    private String mRepeat1 = "once";
-    private String mRepeat2 = "twice";
-    private String active = "true";
+    private final String mDateTime1 = "charCode1";
+    private final String mRepeatType1 = "Hour";
+    private final String mDateTime2 = "charCode2";
+    private final String mRepeatType2 = "Week";
+    private final String mRepeat1 = "once";
+    private final String mRepeat2 = "twice";
+    private final String active = "true";
     private List<ReminderItem> mItems;
 
     @Before

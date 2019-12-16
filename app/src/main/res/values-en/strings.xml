@@ -15,7 +15,7 @@
     <string name="no_reminders">Please click on Float button to create a reminder</string>
     <string name="send_report">Send report via</string>
     <string name="tone_description">Tone for notifications</string>
-    <string name="tone">Default tone</string>
+    <string name="choose_default_tone">Default tone</string>
     <string name="group_by_date_desc">Sort by date descending</string>
     <string name="group_by_date_asc">Sort by date ascending</string>
     <string name="group_by_title_asc">Sort A - Z</string>

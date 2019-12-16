@@ -6,7 +6,7 @@
         <RingtonePreference
             android:key="@string/pref_tone_default_key"
             android:summary="@string/tone_description"
-            android:title="@string/tone"
+            android:title="@string/choose_default_tone"
             android:ringtoneType="notification"
             android:showSilent="false"
             android:icon="@drawable/music"/>

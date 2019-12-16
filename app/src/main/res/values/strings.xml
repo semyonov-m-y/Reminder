@@ -15,7 +15,7 @@
     <string name="no_reminders">Пожалуйста, нажмите на ПЛЮС, чтобы добавить напоминание!</string>
     <string name="send_report">Отправить напоминание через</string>
     <string name="tone_description">Звук для напоминания</string>
-    <string name="tone">Мелодия по умолчанию</string>
+    <string name="choose_default_tone">Мелодия по умолчанию</string>
     <string name="group_by_date_desc">Сортировать по убыванию даты</string>
     <string name="group_by_date_asc">Сортировать по возрастанию даты</string>
     <string name="group_by_title_asc">Сортировать А - Я</string>
@@ -25,7 +25,7 @@
     <string name="report">Отправить</string>
     <string name="choose_color">Выбрать цвет</string>
     <string name="set_app_color">Установить цвет приложения</string>
-    <string name="choose_app_color">Выбрать цвет приложения</string>
+    <string name="choose_app_color">Выберите цвет приложения</string>
     <string name="repeat_set_interval_button">Кнопка выбора интервала повторения</string>
     <string name="repeat_set_button">Кнопка включения и отключения повторения</string>
     <string name="time_set_button">Кнопка установления времени</string>
@@ -44,7 +44,7 @@
     <string name="cancel">Отмена</string>
     <string name="saved">Сохранён</string>
     <string name="color_green">Зелёный</string>
-    <string name="pink_color">Розовый</string>
+    <string name="pink_color">Малиновый</string>
     <string name="blue_color">Синий</string>
     <string name="color_default">По умолчанию</string>
     <string name="edit_text_field">Поле редактирования напоминания. Добавьте ваше напоминание сюда</string>
@@ -68,7 +68,7 @@
     <string-array name="app_color">
         <item>По умолчанию</item>
         <item>Зелёный</item>
-        <item>Розовый</item>
+        <item>Малиновый</item>
         <item>Синий</item>
     </string-array>
 </resources>

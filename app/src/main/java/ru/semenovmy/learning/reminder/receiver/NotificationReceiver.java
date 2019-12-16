@@ -16,6 +16,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+
 import java.util.Calendar;
 
 import ru.semenovmy.learning.reminder.R;
@@ -81,7 +82,9 @@ public class NotificationReceiver extends BroadcastReceiver {
         }
 
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(mReceivedID, mNotification.build());
+        if (mNotification != null) {
+            notificationManager.notify(mReceivedID, mNotification.build());
+        }
     }
 
     /**

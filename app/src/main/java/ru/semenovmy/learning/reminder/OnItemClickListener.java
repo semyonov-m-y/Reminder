@@ -5,6 +5,6 @@ package ru.semenovmy.learning.reminder;
  *
  * @author Maxim Semenov on 2019-11-15
  */
-public interface OnItemClickListener {
+interface OnItemClickListener {
     void onClick(int id);
 }

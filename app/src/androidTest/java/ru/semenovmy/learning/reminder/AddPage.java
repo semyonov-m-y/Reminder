@@ -5,51 +5,46 @@ import androidx.test.espresso.ViewInteraction;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
-public class AddPage {
+class AddPage {
 
-    ViewInteraction mTitleText = onView(withId(R.id.reminder_title));
-    ViewInteraction mSaveButton = onView(withId(R.id.save_reminder));
-    ViewInteraction mPhotoButton = onView(withId(R.id.note_camera));
-    ViewInteraction mDate = onView(withId(R.id.date_icon));
-    ViewInteraction mTime = onView(withId(R.id.time_icon));
-    ViewInteraction mRepeatSwitch = onView(withId(R.id.repeat_switch));
-    ViewInteraction mRepeatNo = onView(withId(R.id.repeat_no_icon));
-    ViewInteraction mRepeatType = onView(withId(R.id.repeat_type_icon));
-    ViewInteraction mReport = onView(withId(R.id.note_report));
+    private final ViewInteraction mTitleText = onView(withId(R.id.reminder_title));
+    private final ViewInteraction mSaveButton = onView(withId(R.id.save_reminder));
+    private final ViewInteraction mPhotoButton = onView(withId(R.id.note_camera));
+    private final ViewInteraction mDate = onView(withId(R.id.date_icon));
+    private final ViewInteraction mTime = onView(withId(R.id.time_icon));
+    private final ViewInteraction mRepeatSwitch = onView(withId(R.id.repeat_switch));
+    private final ViewInteraction mRepeatNo = onView(withId(R.id.repeat_no_icon));
+    private final ViewInteraction mRepeatType = onView(withId(R.id.repeat_type_icon));
 
-    public ViewInteraction getmTitleText() {
+    ViewInteraction getTitleText() {
         return mTitleText;
     }
 
-    public ViewInteraction getmSaveButton() {
+    ViewInteraction getSaveButton() {
         return mSaveButton;
     }
 
-    public ViewInteraction getmPhotoButton() {
+    ViewInteraction getPhotoButton() {
         return mPhotoButton;
     }
 
-    public ViewInteraction getmDate() {
+    ViewInteraction getDate() {
         return mDate;
     }
 
-    public ViewInteraction getmTime() {
+    ViewInteraction getTime() {
         return mTime;
     }
 
-    public ViewInteraction getmRepeatSwitch() {
+    ViewInteraction getRepeatSwitch() {
         return mRepeatSwitch;
     }
 
-    public ViewInteraction getmRepeatNo() {
+    ViewInteraction getRepeatNo() {
         return mRepeatNo;
     }
 
-    public ViewInteraction getmRepeatType() {
+    ViewInteraction getRepeatType() {
         return mRepeatType;
-    }
-
-    public ViewInteraction getmReport() {
-        return mReport;
     }
 }

@@ -24,11 +24,11 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 
 import ru.semenovmy.learning.reminder.adapter.SpinnerAdapter;
+import ru.semenovmy.learning.reminder.data.database.Reminder;
+import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
 import ru.semenovmy.learning.reminder.data.model.ReminderItem;
 import ru.semenovmy.learning.reminder.receiver.BootReceiver;
 import ru.semenovmy.learning.reminder.receiver.NotificationReceiver;
-import ru.semenovmy.learning.reminder.data.database.ReminderDatabase;
-import ru.semenovmy.learning.reminder.data.database.Reminder;
 
 /**
  * Main class for recycler view
@@ -41,16 +41,16 @@ public class MainRecyclerViewActivity extends AppCompatActivity
 
     public static int sItemPosition;
 
-    public NotificationReceiver mNotificationReceiver;
-    public RecyclerView mList;
-    public FilterRecyclerView mAdapter;
-    public ReminderDatabase mReminderDatabase;
-    public TextView mNoReminderView;
+    private NotificationReceiver mNotificationReceiver;
+    private FilterRecyclerView mFilterRecyclerView;
+    private MyAsyncTask myAsyncTask;
+    private RecyclerView mList;
+    private FilterRecyclerView mAdapter;
+    private ReminderDatabase mReminderDatabase;
+    private TextView mNoReminderView;
     private BootReceiver mBootReceiver;
     private FloatingActionButton mAddReminderButton;
     private Toolbar mToolbar;
-    public FilterRecyclerView mFilterRecyclerView;
-    public MyAsyncTask myAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,6 +182,87 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     }
 
     /**
+     * Метод для реагирования на изменение прав установки цвета страницы
+     */
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
+        if (backgroundColour != null) {
+            if (backgroundColour.equals(getString(R.string.color_green))) {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorGreen));
+            } else if (backgroundColour.equals(getString(R.string.pink_color))) {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorPink));
+            } else if (backgroundColour.equals(getString(R.string.blue_color))) {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorBlue));
+            } else {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.primary_dark));
+            }
+        }
+    }
+
+    /**
+     * Метод для установки LayoutManager
+     */
+    public RecyclerView.LayoutManager getLayoutManager() {
+        return new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+    }
+
+    /**
+     * Метод для установки ненулевого количества элементов по умолчанию
+     */
+    public int getDefaultItemCount() {
+        return 100;
+    }
+
+    /**
+     * Метод для установки цвета страницы
+     */
+    public void setUpDefaultSetting() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
+        if (backgroundColour != null) {
+            if (backgroundColour.equals(getString(R.string.color_green))) {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorGreen));
+            } else if (backgroundColour.equals(getString(R.string.pink_color))) {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorPink));
+            } else if (backgroundColour.equals(getString(R.string.blue_color))) {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorBlue));
+            } else {
+                findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.primary_dark));
+            }
+        }
+    }
+
+    /**
+     * Метод для действия при нажатии на элемент Recycler View
+     */
+    @Override
+    public void onClick(int id) {
+        String mStringClickID = Integer.toString(id);
+
+        Intent intent = new Intent(this, ReminderEditActivity.class);
+        intent.putExtra(ReminderEditActivity.EXTRA_REMINDER_ID, mStringClickID);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mNotificationReceiver);
+        unregisterReceiver(mBootReceiver);
+    }
+
+    private class MyAsyncTask extends AsyncTask<Integer, Integer, List<ReminderItem>> {
+
+        @Override
+        protected List<ReminderItem> doInBackground(Integer... voids) {
+            return mAdapter.getListData(mAdapter.getItemCount());
+        }
+    }
+
+    /**
      * Метод для инициализации выпадающего списка
      */
     private void initDisplayModeSpinner() {
@@ -209,82 +290,5 @@ public class MainRecyclerViewActivity extends AppCompatActivity
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-    }
-
-    /**
-     * Метод для реагирования на изменение прав установки цвета страницы
-     */
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
-        if (backgroundColour.equals(getString(R.string.color_green))) {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorBlue));
-        } else {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.primary_dark));
-        }
-    }
-
-    /**
-     * Метод для установки LayoutManager
-     */
-    public RecyclerView.LayoutManager getLayoutManager() {
-        return new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-    }
-
-    /**
-     * Метод для установки ненулевого количества элементов по умолчанию
-     */
-    public int getDefaultItemCount() {
-        return 100;
-    }
-
-    /**
-     * Метод для установки цвета страницы
-     */
-    public void setUpDefaultSetting() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-
-        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
-        if (backgroundColour.equals(getString(R.string.color_green))) {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.colorBlue));
-        } else {
-            findViewById(R.id.main_activity_id).setBackgroundColor(getResources().getColor(R.color.primary_dark));
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(mNotificationReceiver);
-        unregisterReceiver(mBootReceiver);
-    }
-
-    /**
-     * Метод для действия при нажатии на элемент Recycler View
-     */
-    @Override
-    public void onClick(int id) {
-        String mStringClickID = Integer.toString(id);
-
-        Intent intent = new Intent(this, ReminderEditActivity.class);
-        intent.putExtra(ReminderEditActivity.EXTRA_REMINDER_ID, mStringClickID);
-        startActivityForResult(intent, 1);
-    }
-
-    private class MyAsyncTask extends AsyncTask<Integer, Integer, List<ReminderItem>> {
-
-        @Override
-        protected List<ReminderItem> doInBackground(Integer... voids) {
-            return mAdapter.getListData(mAdapter.getItemCount());
-        }
     }
 }

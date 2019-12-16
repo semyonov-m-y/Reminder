@@ -7,14 +7,9 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 class MainPage {
 
-    ViewInteraction mAddReminderButton = onView(withId(R.id.add_reminder));
-    ViewInteraction mFilterRecyclerView = onView(withId(R.id.reminder_list));
+    private final ViewInteraction mAddReminderButton = onView(withId(R.id.add_reminder));
 
-    public ViewInteraction getmAddReminderButton() {
+    ViewInteraction getAddReminderButton() {
         return mAddReminderButton;
-    }
-
-    public ViewInteraction getmFilterRecyclerView() {
-        return mFilterRecyclerView;
     }
 }

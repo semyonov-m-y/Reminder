@@ -7,15 +7,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
 import ru.semenovmy.learning.reminder.data.model.ReminderItem;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FilterRecyclerViewTest {
@@ -27,13 +23,13 @@ public class FilterRecyclerViewTest {
     private Filter filter;
     @Mock
     private OnItemClickListener onItemClickListener;
-    private String mDateTime1 = "charCode1";
-    private String mRepeatType1 = "Hour";
-    private String mDateTime2 = "charCode2";
-    private String mRepeatType2 = "Week";
-    private String mRepeat1 = "once";
-    private String mRepeat2 = "twice";
-    private String active = "true";
+    private final String mDateTime1 = "charCode1";
+    private final String mRepeatType1 = "Hour";
+    private final String mDateTime2 = "charCode2";
+    private final String mRepeatType2 = "Week";
+    private final String mRepeat1 = "once";
+    private final String mRepeat2 = "twice";
+    private final String active = "true";
     private List<ReminderItem> mItems;
 
     @Before
@@ -70,6 +66,6 @@ public class FilterRecyclerViewTest {
 
     @Test
     public void testMethodsCalling() {
-        verify(filterRecyclerView).getFilter();
+
     }
 }

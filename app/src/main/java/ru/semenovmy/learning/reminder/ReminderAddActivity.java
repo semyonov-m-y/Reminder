@@ -60,22 +60,24 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     static final long sMilWeek = 604800000L;
 
     static final int REQUEST_PHOTO = 2;
+
     final int GALLERY_REQUEST_CODE = 0;
 
     private static ReminderDatabase sBase;
 
-    public Button mReportButton;
-    public Calendar mCalendar;
-    public EditText mTitleText;
-    public FloatingActionButton mFloatingActionButton1, mFloatingActionButton2;
-    public ImageButton mPhotoButton;
-    public ImageView mPhotoView;
-    public int mYear, mMonth, mHour, mMinute, mDay, mID;
-    public long mRepeatTime;
-    public Reminder mReminder;
-    public String mTitle, mTime, mDate, mRepeat, mRepeatAmount, mRepeatType, mActive;
-    public TextView mDateText, mTimeText, mRepeatText, mRepeatAmountText, mRepeatTypeText;
-    public Toolbar mToolbar;
+    private Reminder mReminder;
+
+    Button mReportButton;
+    Calendar mCalendar;
+    EditText mTitleText;
+    FloatingActionButton mFloatingActionButton1, mFloatingActionButton2;
+    ImageButton mPhotoButton;
+    ImageView mPhotoView;
+    int mYear, mMonth, mHour, mMinute, mDay, mID;
+    long mRepeatTime;
+    String mTitle, mTime, mDate, mRepeat, mRepeatAmount, mRepeatType, mActive;
+    TextView mDateText, mTimeText, mRepeatText, mRepeatAmountText, mRepeatTypeText;
+    Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +96,11 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         mFloatingActionButton2 = findViewById(R.id.starred2);
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle(R.string.title_activity_add_reminder);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.title_activity_add_reminder);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         // Устанавливаем значения по умолчанию
         mActive = "true";
@@ -166,10 +170,10 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
             mActive = savedInstanceState.getString(KEY_ACTIVE);
         }
 
-        if (mActive.equals("false")) {
+        if (("false").equals(mActive)) {
             mFloatingActionButton1.setVisibility(View.VISIBLE);
             mFloatingActionButton2.setVisibility(View.GONE);
-        } else if (mActive.equals("true")) {
+        } else if (("true").equals(mActive)) {
             mFloatingActionButton1.setVisibility(View.GONE);
             mFloatingActionButton2.setVisibility(View.VISIBLE);
         }
@@ -202,36 +206,21 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
     }
 
     /**
-     * Метод для получения фото с камеры
-     * @param reminder напоминание для добавления фото
-     * @return директория для фото
-     */
-    File getPhotoFile(Reminder reminder) {
-        File filesDir = getApplicationContext().getFilesDir();
-        return new File(filesDir, reminder.getPhotoFilename());
-    }
-
-    static ReminderDatabase get(Context context) {
-        if (sBase == null) {
-            sBase = new ReminderDatabase(context);
-        }
-        return sBase;
-    }
-
-    /**
      * Метод для реагирования на изменение прав установки цвета страницы
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
-        if (backgroundColour.equals(getString(R.string.color_green))) {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorBlue));
-        } else {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.primary_dark));
+        if (backgroundColour != null) {
+            if (backgroundColour.equals(getString(R.string.color_green))) {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorGreen));
+            } else if (backgroundColour.equals(getString(R.string.pink_color))) {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorPink));
+            } else if (backgroundColour.equals(getString(R.string.blue_color))) {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorBlue));
+            } else {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.primary_dark));
+            }
         }
     }
 
@@ -379,6 +368,91 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         alert.show();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_save_reminder, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
+            case R.id.save_reminder:
+                mTitleText.setText(mTitle);
+
+                if (mTitleText.getText().toString().length() == 0)
+                    mTitleText.setError(getString(R.string.not_blank));
+
+                else {
+                    saveReminder();
+                }
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Метод для установки цвета страницы
+     */
+    void setUpColorSetting() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
+        if (backgroundColour != null) {
+            if (backgroundColour.equals(getString(R.string.color_green))) {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorGreen));
+            } else if (backgroundColour.equals(getString(R.string.pink_color))) {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorPink));
+            } else if (backgroundColour.equals(getString(R.string.blue_color))) {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorBlue));
+            } else {
+                findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.primary_dark));
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putCharSequence(KEY_TITLE, mTitleText.getText());
+        outState.putCharSequence(KEY_TIME, mTimeText.getText());
+        outState.putCharSequence(KEY_DATE, mDateText.getText());
+        outState.putCharSequence(KEY_REPEAT, mRepeatText.getText());
+        outState.putCharSequence(KEY_REPEAT_NO, mRepeatAmountText.getText());
+        outState.putCharSequence(KEY_REPEAT_TYPE, mRepeatTypeText.getText());
+        outState.putCharSequence(KEY_ACTIVE, mActive);
+    }
+
+    /**
+     * Метод для получения фото с камеры
+     * @param reminder напоминание для добавления фото
+     * @return директория для фото
+     */
+    File getPhotoFile(Reminder reminder) {
+        File filesDir = getApplicationContext().getFilesDir();
+        return new File(filesDir, reminder.getPhotoFilename());
+    }
+
+    static ReminderDatabase get(Context context) {
+        if (sBase == null) {
+            sBase = new ReminderDatabase(context);
+        }
+        return sBase;
+    }
+
     /**
      * Метод для задания реакциии на нажатие кнопки сохранения записи
      */
@@ -419,71 +493,5 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
         Toast.makeText(getApplicationContext(), getString(R.string.saved), Toast.LENGTH_SHORT).show();
 
         onBackPressed();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_save_reminder, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-
-            case R.id.save_reminder:
-                mTitleText.setText(mTitle);
-
-                if (mTitleText.getText().toString().length() == 0)
-                    mTitleText.setError(getString(R.string.not_blank));
-
-                else {
-                    saveReminder();
-                }
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putCharSequence(KEY_TITLE, mTitleText.getText());
-        outState.putCharSequence(KEY_TIME, mTimeText.getText());
-        outState.putCharSequence(KEY_DATE, mDateText.getText());
-        outState.putCharSequence(KEY_REPEAT, mRepeatText.getText());
-        outState.putCharSequence(KEY_REPEAT_NO, mRepeatAmountText.getText());
-        outState.putCharSequence(KEY_REPEAT_TYPE, mRepeatTypeText.getText());
-        outState.putCharSequence(KEY_ACTIVE, mActive);
-    }
-
-    /**
-     * Метод для установки цвета страницы
-     */
-    void setUpColorSetting() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-
-        String backgroundColour = sharedPreferences.getString(getString(R.string.set_color), getString(R.string.color_default));
-        if (backgroundColour.equals(getString(R.string.color_green))) {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorGreen));
-        } else if (backgroundColour.equals(getString(R.string.pink_color))) {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorPink));
-        } else if (backgroundColour.equals(getString(R.string.blue_color))) {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.colorBlue));
-        } else {
-            findViewById(R.id.activity_add).setBackgroundColor(getResources().getColor(R.color.primary_dark));
-        }
     }
 }

@@ -15,7 +15,7 @@ import ru.semenovmy.learning.reminder.sorter.DateTimeSorter;
  */
 public class DateTimeComparator implements Comparator {
 
-    public final DateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy hh:mm", Locale.US);
+    private final DateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy hh:mm", Locale.US);
 
     public int compare(Object firstObject, Object secondObject) {
         String object1 = ((DateTimeSorter) firstObject).getDateTime();

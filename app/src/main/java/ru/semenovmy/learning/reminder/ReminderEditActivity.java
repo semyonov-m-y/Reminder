@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
@@ -44,7 +45,7 @@ public class ReminderEditActivity extends ReminderAddActivity implements
     private ReminderDatabase mReminderDatabase;
     private String[] mDateSplit, mTimeSplit;
     private Switch mRepeatSwitch;
-    public File mPhotoFile;
+    private File mPhotoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +65,11 @@ public class ReminderEditActivity extends ReminderAddActivity implements
         mRepeatSwitch = findViewById(R.id.repeat_switch);
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle(R.string.title_activity_edit_reminder);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.title_activity_edit_reminder);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         mTitleText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -133,18 +136,18 @@ public class ReminderEditActivity extends ReminderAddActivity implements
             mActive = savedInstanceState.getString(KEY_ACTIVE);
         }
 
-        if (mActive.equals("false")) {
+        if (("false").equals(mActive)) {
             mFloatingActionButton1.setVisibility(View.VISIBLE);
             mFloatingActionButton2.setVisibility(View.GONE);
-        } else if (mActive.equals("true")) {
+        } else if (("true").equals(mActive)) {
             mFloatingActionButton1.setVisibility(View.GONE);
             mFloatingActionButton2.setVisibility(View.VISIBLE);
         }
 
-        if (mRepeat.equals("false")) {
+        if (("false").equals(mRepeat)) {
             mRepeatSwitch.setChecked(false);
             mRepeatText.setText(R.string.repeat_off);
-        } else if (mRepeat.equals("true")) {
+        } else if (("true").equals(mRepeat)) {
             mRepeatSwitch.setChecked(true);
         }
 
@@ -236,6 +239,42 @@ public class ReminderEditActivity extends ReminderAddActivity implements
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
+            case R.id.save_reminder:
+                mTitleText.setText(mTitle);
+
+                if (mTitleText.getText().toString().length() == 0)
+                    mTitleText.setError(getString(R.string.not_blank));
+
+                else {
+                    updateReminder();
+                }
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putCharSequence(KEY_TITLE, mTitleText.getText());
+        outState.putCharSequence(KEY_TIME, mTimeText.getText());
+        outState.putCharSequence(KEY_DATE, mDateText.getText());
+        outState.putCharSequence(KEY_REPEAT, mRepeatText.getText());
+        outState.putCharSequence(KEY_REPEAT_NO, mRepeatAmountText.getText());
+        outState.putCharSequence(KEY_REPEAT_TYPE, mRepeatTypeText.getText());
+        outState.putCharSequence(KEY_ACTIVE, mActive);
+    }
+
     /**
      * Метод для редактирования напоминания
      */
@@ -285,41 +324,5 @@ public class ReminderEditActivity extends ReminderAddActivity implements
         Toast.makeText(getApplicationContext(), getString(R.string.edited_text), Toast.LENGTH_SHORT).show();
 
         onBackPressed();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-
-            case R.id.save_reminder:
-                mTitleText.setText(mTitle);
-
-                if (mTitleText.getText().toString().length() == 0)
-                    mTitleText.setError(getString(R.string.not_blank));
-
-                else {
-                    updateReminder();
-                }
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putCharSequence(KEY_TITLE, mTitleText.getText());
-        outState.putCharSequence(KEY_TIME, mTimeText.getText());
-        outState.putCharSequence(KEY_DATE, mDateText.getText());
-        outState.putCharSequence(KEY_REPEAT, mRepeatText.getText());
-        outState.putCharSequence(KEY_REPEAT_NO, mRepeatAmountText.getText());
-        outState.putCharSequence(KEY_REPEAT_TYPE, mRepeatTypeText.getText());
-        outState.putCharSequence(KEY_ACTIVE, mActive);
     }
 }

@@ -39,8 +39,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(R.string.boot_completed)) {
-
+        if (context.getString(R.string.boot_completed).equals(intent.getAction())) {
             ReminderDatabase rb = new ReminderDatabase(context);
             mCalendar = Calendar.getInstance();
             mNotificationReceiver = new NotificationReceiver();

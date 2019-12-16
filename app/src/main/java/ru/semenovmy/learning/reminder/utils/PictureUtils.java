@@ -12,12 +12,18 @@ import android.graphics.Point;
  */
 public class PictureUtils {
 
+    public static Bitmap getScaledBitmap(String path, Activity activity) {
+        Point size = new Point();
+        activity.getWindowManager().getDefaultDisplay().getSize(size);
+        return getScaledBitmap(path, size.x, size.y);
+    }
+
     /**
      * Метод оптимизации размера добавляемого фото
      * @param path путь к файлу
      * @param destWidth необходимая ширина фото
      * @param destHeight необходимая высота фото
-     * @return
+     * @return возвращаемый после всех изменений файл
      */
     private static Bitmap getScaledBitmap(String path, int destWidth, int destHeight) {
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -38,11 +44,5 @@ public class PictureUtils {
         options.inSampleSize = inSampleSize;
 
         return BitmapFactory.decodeFile(path, options);
-    }
-
-    public static Bitmap getScaledBitmap(String path, Activity activity) {
-        Point size = new Point();
-        activity.getWindowManager().getDefaultDisplay().getSize(size);
-        return getScaledBitmap(path, size.x, size.y);
     }
 }

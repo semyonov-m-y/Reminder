@@ -43,7 +43,7 @@ public class Reminder {
         return mID;
     }
 
-    public void setID(int ID) {
+    void setID(int ID) {
         mID = ID;
     }
 
