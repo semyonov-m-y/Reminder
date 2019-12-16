@@ -65,8 +65,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
 
     private static ReminderDatabase sBase;
 
-    private Reminder mReminder;
-
     Button mReportButton;
     Calendar mCalendar;
     EditText mTitleText;
@@ -187,11 +185,6 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
             i = Intent.createChooser(i, getString(R.string.send_report));
             startActivity(i);
         });
-
-        // Обрабатываем работу с картинкой
-        if (get(getApplicationContext()).getAllReminders() == null) {
-            mReminder = get(getApplicationContext()).getAllReminders().get(mID);
-        }
 
         mPhotoButton = findViewById(R.id.note_camera);
         mPhotoButton.setOnClickListener(view -> {
@@ -438,6 +431,7 @@ public class ReminderAddActivity extends AppCompatActivity implements TimePicker
 
     /**
      * Метод для получения фото с камеры
+     *
      * @param reminder напоминание для добавления фото
      * @return директория для фото
      */

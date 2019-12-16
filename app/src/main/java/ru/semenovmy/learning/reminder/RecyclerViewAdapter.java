@@ -102,13 +102,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private final ImageView mActiveImage;
         private final ImageView mThumbnailImage;
         private final ColorGenerator mColorGenerator = ColorGenerator.DEFAULT;
+
         private TextDrawable mDrawableBuilder;
-        private final RecyclerViewAdapter mAdapter;
 
         VerticalItemHolder(View itemView, RecyclerViewAdapter adapter) {
             super(itemView, mSelector);
-
-            mAdapter = adapter;
 
             mTitleText = itemView.findViewById(R.id.recycle_title);
             mDateAndTimeText = itemView.findViewById(R.id.recycle_date_time);
@@ -313,6 +311,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     /**
      * Метод для сортировки списка
+     *
      * @param position выбор элемента spinner-а
      */
     private void listSort(int position) {

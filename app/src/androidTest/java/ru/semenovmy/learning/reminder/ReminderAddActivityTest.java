@@ -1,6 +1,7 @@
 package ru.semenovmy.learning.reminder;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.espresso.Espresso;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.rule.ActivityTestRule;
@@ -29,6 +30,7 @@ public class ReminderAddActivityTest {
     @Test
     public void checkEditTextAndSaveButton() {
         mainRecyclerViewActivityTest.checkAddButton();
+        Espresso.closeSoftKeyboard();
 
         String blank = "";
 
@@ -45,6 +47,7 @@ public class ReminderAddActivityTest {
     @Test
     public void checkImageButtonAndText() {
         mainRecyclerViewActivityTest.checkAddButton();
+        Espresso.closeSoftKeyboard();
 
         addPage.getPhotoButton().perform(click());
 
@@ -55,6 +58,7 @@ public class ReminderAddActivityTest {
     @Test
     public void checkDate() {
         mainRecyclerViewActivityTest.checkAddButton();
+        Espresso.closeSoftKeyboard();
 
         addPage.getDate().perform(click());
 
@@ -70,6 +74,7 @@ public class ReminderAddActivityTest {
     @Test
     public void checkTime() {
         mainRecyclerViewActivityTest.checkAddButton();
+        Espresso.closeSoftKeyboard();
 
         addPage.getTime().perform(click());
 
@@ -85,6 +90,7 @@ public class ReminderAddActivityTest {
     @Test
     public void checkRepeatSwitch() {
         mainRecyclerViewActivityTest.checkAddButton();
+        Espresso.closeSoftKeyboard();
 
         addPage.getRepeatSwitch().perform(click());
 
@@ -101,6 +107,9 @@ public class ReminderAddActivityTest {
     @Test
     public void checkRepeatNo() {
         mainRecyclerViewActivityTest.checkAddButton();
+        Espresso.closeSoftKeyboard();
+
+        onView(ViewMatchers.withId(R.id.scroll_view)).perform(ViewActions.swipeUp());
 
         addPage.getRepeatNo().perform(click());
 
@@ -111,8 +120,10 @@ public class ReminderAddActivityTest {
         onView(withText("1")).perform(typeText(two));
 
         String ok = InstrumentationRegistry.getTargetContext().getString(R.string.cancel).toUpperCase();
-        onView(withText(ok)).check(matches(isDisplayed())).perform(click());
 
+
+        onView(withText(ok)).check(matches(isDisplayed())).perform(click());
+        Espresso.closeSoftKeyboard();
         addPage.getRepeatNo().perform(click());
 
         String cancel = InstrumentationRegistry.getTargetContext().getString(R.string.ok).toUpperCase();
@@ -123,7 +134,10 @@ public class ReminderAddActivityTest {
     public void checkRepeatType() {
         mainRecyclerViewActivityTest.checkAddButton();
 
+        Espresso.closeSoftKeyboard();
+
         onView(ViewMatchers.withId(R.id.scroll_view)).perform(ViewActions.swipeUp());
+
 
         addPage.getRepeatType().perform(click());
 
@@ -147,15 +161,5 @@ public class ReminderAddActivityTest {
 
         String week = InstrumentationRegistry.getTargetContext().getString(R.string.week);
         onView(withText(week)).check(matches(isDisplayed())).perform(click());
-    }
-
-    @Test
-    public void checkReportButton() {
-        mainRecyclerViewActivityTest.checkAddButton();
-
-        onView(ViewMatchers.withId(R.id.scroll_view)).perform(ViewActions.swipeUp());
-
-        String report = InstrumentationRegistry.getTargetContext().getString(R.string.report);
-        onView(withText(report)).check(matches(isDisplayed())).perform(click());
     }
 }

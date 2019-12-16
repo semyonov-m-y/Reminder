@@ -42,7 +42,6 @@ public class MainRecyclerViewActivity extends AppCompatActivity
     public static int sItemPosition;
 
     private NotificationReceiver mNotificationReceiver;
-    private FilterRecyclerView mFilterRecyclerView;
     private MyAsyncTask myAsyncTask;
     private RecyclerView mList;
     private FilterRecyclerView mAdapter;
@@ -90,8 +89,6 @@ public class MainRecyclerViewActivity extends AppCompatActivity
         initDisplayModeSpinner();
 
         setUpDefaultSetting();
-
-        mFilterRecyclerView = new FilterRecyclerView(getApplicationContext(), this);
     }
 
     /**
